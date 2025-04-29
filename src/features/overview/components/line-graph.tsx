@@ -43,8 +43,23 @@ const chartConfig = {
 export function LineGraph({ data, title, subtext }: LineGraphProps) {
   // Format the date for display
   const formatDate = (timestamp: number) => {
+    // Ensure timestamp is a valid number
+    if (typeof timestamp !== 'number' || isNaN(timestamp)) {
+      console.warn('Invalid timestamp:', timestamp);
+      return 'Invalid date';
+    }
+
     const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date created from timestamp:', timestamp);
+      return 'Invalid date';
+    }
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   // Calculate average value for the footer display
@@ -80,15 +95,29 @@ export function LineGraph({ data, title, subtext }: LineGraphProps) {
                 axisLine={false}
                 minTickGap={32}
               />
-              <YAxis hide={false} tickLine={false} axisLine={false} />
               <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value) => {
-                      return formatDate(Number(value));
-                    }}
-                  />
-                }
+                content={(props) => {
+                  // Fix: Get the actual timestamp from the active payload
+                  if (
+                    props.active &&
+                    props.payload &&
+                    props.payload.length > 0
+                  ) {
+                    const timestamp = props.payload[0].payload.timestamp;
+                    // Apply the formatDate function to the actual timestamp
+                    const formattedDate = formatDate(timestamp);
+
+                    // Pass the formatted date to ChartTooltipContent
+                    return (
+                      <ChartTooltipContent
+                        active={props.active}
+                        payload={props.payload}
+                        label={formattedDate}
+                      />
+                    );
+                  }
+                  return null;
+                }}
               />
               <defs>
                 <linearGradient id='colorValue' x1='0' y1='0' x2='0' y2='1'>

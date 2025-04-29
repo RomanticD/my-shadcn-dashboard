@@ -18,14 +18,13 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
+import { PieChartDataPoint, ChartMetadata } from '@/models/chart';
 
-const chartData = [
-  { browser: 'chrome', visitors: 275, fill: 'var(--primary)' },
-  { browser: 'safari', visitors: 200, fill: 'var(--primary-light)' },
-  { browser: 'firefox', visitors: 287, fill: 'var(--primary-lighter)' },
-  { browser: 'edge', visitors: 173, fill: 'var(--primary-dark)' },
-  { browser: 'other', visitors: 190, fill: 'var(--primary-darker)' }
-];
+interface PieGraphProps {
+  data: PieChartDataPoint[];
+  metadata?: ChartMetadata;
+  total: number;
+}
 
 const chartConfig = {
   visitors: {
@@ -53,18 +52,21 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function PieGraph() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
-
+export function PieGraph({
+  data,
+  metadata = {
+    title: 'Pie Chart - Donut with Text',
+    description: 'Total visitors by browser for the last 6 months'
+  },
+  total
+}: PieGraphProps) {
   return (
     <Card className='@container/card'>
       <CardHeader>
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
+        <CardTitle>{metadata.title}</CardTitle>
         <CardDescription>
           <span className='hidden @[540px]/card:block'>
-            Total visitors by browser for the last 6 months
+            {metadata.description}
           </span>
           <span className='@[540px]/card:hidden'>Browser distribution</span>
         </CardDescription>
@@ -105,7 +107,7 @@ export function PieGraph() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData.map((item) => ({
+              data={data.map((item) => ({
                 ...item,
                 fill: `url(#fill${item.browser})`
               }))}
@@ -130,7 +132,7 @@ export function PieGraph() {
                           y={viewBox.cy}
                           className='fill-foreground text-3xl font-bold'
                         >
-                          {totalVisitors.toLocaleString()}
+                          {total.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
@@ -150,8 +152,7 @@ export function PieGraph() {
       </CardContent>
       <CardFooter className='flex-col gap-2 text-sm'>
         <div className='flex items-center gap-2 leading-none font-medium'>
-          Chrome leads with{' '}
-          {((chartData[0].visitors / totalVisitors) * 100).toFixed(1)}%{' '}
+          {metadata.insight?.text || 'Chrome leads with 25.5%'}{' '}
           <IconTrendingUp className='h-4 w-4' />
         </div>
         <div className='text-muted-foreground leading-none'>

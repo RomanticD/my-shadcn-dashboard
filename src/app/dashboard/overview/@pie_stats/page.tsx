@@ -1,7 +1,16 @@
-import { delay } from '@/constants/mock-api';
 import { PieGraph } from '@/features/overview/components/pie-graph';
+import { PieChartDataService } from '@/services/pie-chart-data-service';
 
-export default async function Stats() {
-  await delay(1000);
-  return <PieGraph />;
+export default async function PieStats() {
+  // Fetch data using the service
+  const response = await PieChartDataService.getPieChartData();
+
+  // Pass the data to the component
+  return (
+    <PieGraph
+      data={response.data}
+      metadata={response.metadata}
+      total={response.total}
+    />
+  );
 }

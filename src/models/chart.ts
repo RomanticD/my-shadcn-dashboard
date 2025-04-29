@@ -50,3 +50,16 @@ export interface LineChartResponse {
   metadata: ChartMetadata;
   data: LineChartDataPoint[];
 }
+
+// Pie Chart related interfaces
+export interface PieChartDataPoint {
+  browser: string;
+  visitors: number;
+  fill: string;
+}
+
+export interface PieChartResponse {
+  metadata: ChartMetadata;
+  data: PieChartDataPoint[];
+  total: number;
+}

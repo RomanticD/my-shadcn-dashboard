@@ -151,7 +151,7 @@ export function BarGraph({ data, metadata, totals }: BarGraphProps) {
               content={
                 <ChartTooltipContent
                   className='w-[150px]'
-                  nameKey='views'
+                  nameKey={activeChart}
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString('en-US', {
                       month: 'short',
