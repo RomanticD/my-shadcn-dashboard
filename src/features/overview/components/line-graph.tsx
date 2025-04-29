@@ -25,12 +25,7 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
-
-type LineChartDataPoint = {
-  timestamp: number;
-  value: number;
-  date: string;
-};
+import { LineChartDataPoint } from '@/models/chart';
 
 interface LineGraphProps {
   data: LineChartDataPoint[];

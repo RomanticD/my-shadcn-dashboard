@@ -17,15 +17,12 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
+import { AreaChartDataPoint, ChartMetadata } from '@/models/chart';
 
-const chartData = [
-  { month: 'January', desktop: 186, mobile: 80 },
-  { month: 'February', desktop: 305, mobile: 200 },
-  { month: 'March', desktop: 237, mobile: 120 },
-  { month: 'April', desktop: 73, mobile: 190 },
-  { month: 'May', desktop: 209, mobile: 130 },
-  { month: 'June', desktop: 214, mobile: 140 }
-];
+interface AreaGraphProps {
+  data: AreaChartDataPoint[];
+  metadata?: ChartMetadata;
+}
 
 const chartConfig = {
   visitors: {
@@ -41,14 +38,18 @@ const chartConfig = {
   }
 } satisfies ChartConfig;
 
-export function AreaGraph() {
+export function AreaGraph({
+  data,
+  metadata = {
+    title: 'Area Chart - Stacked',
+    description: 'Showing total visitors for the last 6 months'
+  }
+}: AreaGraphProps) {
   return (
     <Card className='@container/card'>
       <CardHeader>
-        <CardTitle>Area Chart - Stacked</CardTitle>
-        <CardDescription>
-          Showing total visitors for the last 6 months
-        </CardDescription>
+        <CardTitle>{metadata.title}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
       <CardContent className='px-2 pt-4 sm:px-6 sm:pt-6'>
         <ChartContainer
@@ -56,7 +57,7 @@ export function AreaGraph() {
           className='aspect-auto h-[250px] w-full'
         >
           <AreaChart
-            data={chartData}
+            data={data}
             margin={{
               left: 12,
               right: 12
@@ -122,7 +123,7 @@ export function AreaGraph() {
         <div className='flex w-full items-start gap-2 text-sm'>
           <div className='grid gap-2'>
             <div className='flex items-center gap-2 leading-none font-medium'>
-              Trending up by 5.2% this month{' '}
+              {metadata.insight?.text || 'Trending up this month'}{' '}
               <IconTrendingUp className='h-4 w-4' />
             </div>
             <div className='text-muted-foreground flex items-center gap-2 leading-none'>

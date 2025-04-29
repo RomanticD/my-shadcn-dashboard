@@ -17,12 +17,12 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
-import { ChartDataPoint, ChartMetadata } from '@/services/chart-data-service';
+import { BarChartDataPoint, ChartMetadata } from '@/models/chart';
 
 export const description = 'An interactive bar chart';
 
 interface BarGraphProps {
-  data: ChartDataPoint[];
+  data: BarChartDataPoint[];
   metadata: ChartMetadata;
   totals: {
     desktop: number;
