@@ -31,9 +31,6 @@ export interface BarChartResponse {
 export class ChartDataService {
   // 获取柱状图数据的方法
   static async getBarChartData(): Promise<BarChartResponse> {
-    // 模拟API延迟
-    await delay(1000);
-
     // 模拟数据 - 之后可以替换为实际API调用
     const chartData: ChartDataPoint[] = [
       { date: '2024-04-01', desktop: 222, mobile: 150 },
