@@ -242,33 +242,6 @@ export function AreaGraph({ data }: AreaGraphProps) {
           </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
-        <div className='flex w-full items-start gap-2 text-sm'>
-          <div className='grid gap-2'>
-            <div className='flex items-center gap-2 leading-none font-medium'>
-              {metadata.insight?.text || 'Trading activity trending up'}{' '}
-              <IconTrendingUp className='h-4 w-4' />
-            </div>
-            <div className='text-muted-foreground flex items-center gap-2 leading-none'>
-              {data.data.length > 0 && (
-                <>
-                  {new Date(data.data[0].date * 1000).toLocaleDateString(
-                    'en-US',
-                    { month: 'long' }
-                  )}{' '}
-                  -{' '}
-                  {new Date(
-                    data.data[data.data.length - 1].date * 1000
-                  ).toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardFooter>
     </Card>
   );
 }
