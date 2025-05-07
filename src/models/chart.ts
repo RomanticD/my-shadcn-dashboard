@@ -39,6 +39,40 @@ export interface AreaChartResponse {
   data: AreaChartDataPoint[];
 }
 
+// Trade Line Chart related interfaces
+export interface TradeDataPoint {
+  date: number; // timestamp
+  value: number;
+}
+
+export interface PlatformTradeData {
+  platform: string;
+  volume: TradeDataPoint[];
+  count: TradeDataPoint[];
+}
+
+export interface TradeLineChartResponse {
+  code: number;
+  description: string;
+  data: PlatformTradeData[];
+}
+
+export interface ProcessedTradeDataPoint {
+  date: number;
+  formattedDate: string;
+  [platform: string]: number | string; // For dynamically adding platform data
+}
+
+export interface TradeChartData {
+  metadata: ChartMetadata;
+  data: ProcessedTradeDataPoint[];
+  platforms: string[];
+  totals: {
+    volume: Record<string, number>;
+    count: Record<string, number>;
+  };
+}
+
 // Line Chart related interfaces
 export interface LineChartDataPoint {
   timestamp: number;

@@ -1,10 +1,10 @@
 import { AreaGraph } from '@/features/overview/components/area-graph';
-import { AreaChartDataService } from '@/services/area-chart-data-service';
+import { TradeLineChartService } from '@/services/trade-line-chart-service';
 
 export default async function AreaStats() {
-  // Fetch data using the AreaChartDataService
-  const response = await AreaChartDataService.getAreaChartData();
+  // Fetch data using the service
+  const chartData = await TradeLineChartService.getTradeLineChartData();
 
-  // Pass both data and metadata to the AreaGraph component
-  return <AreaGraph data={response.data} metadata={response.metadata} />;
+  // Pass the data to the component
+  return <AreaGraph data={chartData} />;
 }

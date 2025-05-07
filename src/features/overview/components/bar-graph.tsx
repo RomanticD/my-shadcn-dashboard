@@ -17,6 +17,10 @@ import {
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
+import {
+  ChartSelector,
+  ChartSelectorOption
+} from '@/components/ui/chart-selector';
 import { BarChartDataPoint, ChartMetadata } from '@/models/chart';
 
 export const description = 'An interactive bar chart';
@@ -68,6 +72,25 @@ export function BarGraph({ data, metadata, totals }: BarGraphProps) {
     return null;
   }
 
+  // Create options for the chart selector
+  const selectorOptions: ChartSelectorOption[] = [
+    {
+      key: 'desktop',
+      label: chartConfig.desktop.label,
+      value: totals.desktop
+    },
+    {
+      key: 'mobile',
+      label: chartConfig.mobile.label,
+      value: totals.mobile
+    },
+    {
+      key: 'error',
+      label: chartConfig.error.label,
+      value: 0
+    }
+  ].filter((option) => totals[option.key as keyof typeof totals] !== undefined);
+
   return (
     <Card className='@container/card !pt-3'>
       <CardHeader className='flex flex-col items-stretch space-y-0 border-b !p-0 sm:flex-row'>
@@ -82,28 +105,11 @@ export function BarGraph({ data, metadata, totals }: BarGraphProps) {
             </span>
           </CardDescription>
         </div>
-        <div className='flex'>
-          {['desktop', 'mobile', 'error'].map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            if (!chart || totals[key as keyof typeof totals] === undefined)
-              return null;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className='data-[active=true]:bg-primary/5 hover:bg-primary/5 relative flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left transition-colors duration-200 even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6'
-                onClick={() => setActiveChart(chart)}
-              >
-                <span className='text-muted-foreground text-xs'>
-                  {chartConfig[chart].label}
-                </span>
-                <span className='text-lg leading-none font-bold sm:text-3xl'>
-                  {totals[key as keyof typeof totals]?.toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <ChartSelector
+          options={selectorOptions}
+          activeKey={activeChart}
+          onSelect={(key) => setActiveChart(key as keyof typeof chartConfig)}
+        />
       </CardHeader>
       <CardContent className='px-2 pt-4 sm:px-6 sm:pt-6'>
         <ChartContainer
