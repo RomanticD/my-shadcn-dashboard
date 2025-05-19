@@ -49,6 +49,7 @@ export interface PlatformTradeData {
   platform: string;
   volume: TradeDataPoint[];
   count: TradeDataPoint[];
+  avg_count: TradeDataPoint[];
 }
 
 export interface TradeLineChartResponse {
@@ -70,6 +71,7 @@ export interface TradeChartData {
   totals: {
     volume: Record<string, number>;
     count: Record<string, number>;
+    avg_count: Record<string, number>;
   };
 }
 

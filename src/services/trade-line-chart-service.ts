@@ -8,7 +8,7 @@ import {
 
 // Service class for trade line chart data
 export class TradeLineChartService {
-  private static API_URL = 'http://192.168.2.100:3001/api/graph/trade-line';
+  private static API_URL = 'http://localhost:3001/api/graph/trade-line';
 
   // Get trade line chart data
   static async getTradeLineChartData(): Promise<TradeChartData> {
@@ -42,11 +42,13 @@ export class TradeLineChartService {
     const processedData: ProcessedTradeDataPoint[] = [];
     const volumeTotals: Record<string, number> = {};
     const countTotals: Record<string, number> = {};
+    const avgCountTotals: Record<string, number> = {};
 
     // Initialize totals
     platforms.forEach((platform) => {
       volumeTotals[platform] = 0;
       countTotals[platform] = 0;
+      avgCountTotals[platform] = 0;
     });
 
     // Get all unique dates across all platforms
@@ -54,6 +56,7 @@ export class TradeLineChartService {
     data.forEach((platformData) => {
       platformData.volume.forEach((point) => allDates.add(point.date));
       platformData.count.forEach((point) => allDates.add(point.date));
+      platformData.avg_count.forEach((point) => allDates.add(point.date));
     });
 
     // Sort dates in ascending order
@@ -87,6 +90,17 @@ export class TradeLineChartService {
         } else {
           dataPoint[`${platform}_count`] = 0;
         }
+
+        // Find avg_count data for this date and platform
+        const avgCountPoint = platformData.avg_count.find(
+          (p) => p.date === date
+        );
+        if (avgCountPoint) {
+          dataPoint[`${platform}_avg_count`] = Math.round(avgCountPoint.value);
+          avgCountTotals[platform] += avgCountPoint.value;
+        } else {
+          dataPoint[`${platform}_avg_count`] = 0;
+        }
       });
 
       processedData.push(dataPoint);
@@ -96,6 +110,7 @@ export class TradeLineChartService {
     platforms.forEach((platform) => {
       volumeTotals[platform] = Math.round(volumeTotals[platform]);
       countTotals[platform] = Math.round(countTotals[platform]);
+      avgCountTotals[platform] = Math.round(avgCountTotals[platform]);
     });
 
     const metadata: ChartMetadata = {
@@ -113,7 +128,8 @@ export class TradeLineChartService {
       platforms,
       totals: {
         volume: volumeTotals,
-        count: countTotals
+        count: countTotals,
+        avg_count: avgCountTotals
       }
     };
   }

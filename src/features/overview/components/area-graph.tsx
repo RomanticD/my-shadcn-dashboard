@@ -45,6 +45,9 @@ const generateChartConfig = (platforms: string[]): ChartConfig => {
     },
     count: {
       label: 'Transactions'
+    },
+    avg_count: {
+      label: 'Avg Transactions'
     }
   };
 
@@ -58,6 +61,13 @@ const generateChartConfig = (platforms: string[]): ChartConfig => {
 
     config[`${platform}_count`] = {
       label: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Transactions`,
+      color:
+        platformColors[platform as keyof typeof platformColors]?.color ||
+        'var(--primary)'
+    };
+
+    config[`${platform}_avg_count`] = {
+      label: `${platform.charAt(0).toUpperCase() + platform.slice(1)} Avg Transactions`,
       color:
         platformColors[platform as keyof typeof platformColors]?.color ||
         'var(--primary)'
@@ -78,9 +88,9 @@ export function AreaGraph({ data }: AreaGraphProps) {
   const { metadata, platforms } = data;
 
   // All hooks must be called unconditionally at the top level
-  const [activeMetric, setActiveMetric] = useState<'volume' | 'count'>(
-    'volume'
-  );
+  const [activeMetric, setActiveMetric] = useState<
+    'volume' | 'count' | 'avg_count'
+  >('volume');
   const [isClient, setIsClient] = useState(false);
 
   // Generate chart configuration with useMemo
@@ -89,27 +99,28 @@ export function AreaGraph({ data }: AreaGraphProps) {
     [platforms]
   );
 
-  // Create selector options with useMemo
   const selectorOptions = useMemo(() => {
+    const sortedData = [...data.data].sort((a, b) => b.date - a.date);
+    const latestData = sortedData[0] || { formattedDate: '' };
+
     return [
       {
         key: 'volume',
-        label: 'Trade Volume',
-        value: Object.values(data.totals.volume).reduce(
-          (sum, value) => sum + value,
-          0
-        )
+        label: 'Debot今日交易量',
+        value: Math.round((latestData[`debot_volume`] as number) || 0)
       },
       {
         key: 'count',
-        label: 'Transaction Count',
-        value: Object.values(data.totals.count).reduce(
-          (sum, value) => sum + value,
-          0
-        )
+        label: 'Debot今日交易数',
+        value: Math.round((latestData[`debot_count`] as number) || 0)
+      },
+      {
+        key: 'avg_count',
+        label: 'Debot平均交易量',
+        value: Math.round((latestData[`debot_avg_count`] as number) || 0)
       }
     ] as ChartSelectorOption[];
-  }, [data.totals]);
+  }, [data.data]);
 
   // Handle client-side rendering
   useEffect(() => {
@@ -138,7 +149,9 @@ export function AreaGraph({ data }: AreaGraphProps) {
         <ChartSelector
           options={selectorOptions}
           activeKey={activeMetric}
-          onSelect={(key) => setActiveMetric(key as 'volume' | 'count')}
+          onSelect={(key) =>
+            setActiveMetric(key as 'volume' | 'count' | 'avg_count')
+          }
         />
       </CardHeader>
       <CardContent className='px-2 pt-4 sm:px-6 sm:pt-6'>
