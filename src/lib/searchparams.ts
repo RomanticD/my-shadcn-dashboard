@@ -10,7 +10,9 @@ export const searchParams = {
   perPage: parseAsInteger.withDefault(10),
   name: parseAsString,
   gender: parseAsString,
-  category: parseAsString
+  category: parseAsString,
+  platforms: parseAsString,
+  alertFilter: parseAsString
   // advanced filter
   // filters: getFiltersStateParser().withDefault([]),
   // joinOperator: parseAsStringEnum(['and', 'or']).withDefault('and')

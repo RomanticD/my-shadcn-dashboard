@@ -22,6 +22,33 @@ export const navItems: NavItem[] = [
     items: [] // Empty array as there are no child items for Dashboard
   },
   {
+    title: 'Group',
+    url: '#',
+    icon: 'settings',
+    isActive: false,
+    shortcut: ['g', '1'],
+    items: [
+      {
+        title: '交易代币',
+        url: '/dashboard/token',
+        icon: 'billing',
+        shortcut: ['t', 't']
+      },
+      {
+        title: '平台信号',
+        url: '/dashboard/signal',
+        icon: 'help',
+        shortcut: ['s', 's']
+      },
+      {
+        title: 'KOL交易',
+        url: '/dashboard/kol',
+        icon: 'user',
+        shortcut: ['k', 'o']
+      }
+    ]
+  },
+  {
     title: 'Product',
     url: '/dashboard/product',
     icon: 'product',

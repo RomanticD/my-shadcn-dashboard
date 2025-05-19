@@ -24,3 +24,26 @@ export function formatBytes(
       : (sizes[i] ?? 'Bytes')
   }`;
 }
+
+/**
+ * Format a number with specified decimal places and optional thousand separators
+ * @param value - The number to format
+ * @param decimalPlaces - Number of decimal places to show
+ * @param useThousandSeparator - Whether to use thousand separators
+ * @returns Formatted number string
+ */
+export function formatNumber(
+  value: number,
+  decimalPlaces: number = 2,
+  useThousandSeparator: boolean = true
+): string {
+  if (value === undefined || value === null) return '';
+
+  const options: Intl.NumberFormatOptions = {
+    minimumFractionDigits: decimalPlaces,
+    maximumFractionDigits: decimalPlaces,
+    useGrouping: useThousandSeparator
+  };
+
+  return value.toLocaleString(undefined, options);
+}
