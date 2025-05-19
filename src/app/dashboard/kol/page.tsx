@@ -30,7 +30,7 @@ export default function KolPage() {
   }, []);
 
   return (
-    <div className='container mx-auto space-y-6 p-6'>
+    <div className='container mx-auto mb-4 space-y-6 p-6 pb-8'>
       <h1 className='text-3xl font-bold'>KOL Trading Dashboard</h1>
 
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>

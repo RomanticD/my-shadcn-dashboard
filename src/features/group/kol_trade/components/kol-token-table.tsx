@@ -47,6 +47,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DataTablePagination } from '@/components/ui/table/data-table-pagination';
 
 interface KolDetail {
   chain: string;
@@ -212,10 +213,7 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
         </Table>
       </div>
 
-      <CustomDataTablePagination
-        table={kolTable}
-        pageSizeOptions={[5, 10, 20, 50]}
-      />
+      <DataTablePagination table={kolTable} pageSizeOptions={[5, 10, 20, 50]} />
     </div>
   );
 };
@@ -233,7 +231,7 @@ function CustomDataTablePagination<TData>({
   return (
     <div
       className={cn(
-        'flex w-full flex-col-reverse items-center justify-between gap-4 overflow-auto p-1 sm:flex-row sm:gap-8',
+        'flex w-full flex-col-reverse items-center justify-between gap-4 overflow-visible p-1 sm:flex-row sm:gap-8',
         className
       )}
     >
@@ -277,7 +275,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to first page'
             variant='outline'
             size='icon'
-            className='hidden size-8 lg:flex'
+            className='hidden size-7 lg:flex'
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
@@ -287,7 +285,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to previous page'
             variant='outline'
             size='icon'
-            className='size-8'
+            className='size-7'
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -297,7 +295,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to next page'
             variant='outline'
             size='icon'
-            className='size-8'
+            className='size-7'
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -307,7 +305,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to last page'
             variant='outline'
             size='icon'
-            className='hidden size-8 lg:flex'
+            className='hidden size-7 lg:flex'
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
@@ -546,7 +544,7 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
       </div>
 
       <div className='rounded-md border'>
-        <ScrollArea className='h-[calc(100vh-350px)]'>
+        <ScrollArea className='h-[calc(100vh-350px)] max-h-[400px]'>
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -605,7 +603,7 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
       <CustomDataTablePagination
         table={table}
         pageSizeOptions={[5, 10, 20, 50, 100]}
-        className='border-t pt-4'
+        className='mt-2 border-t pt-4'
       />
     </div>
   );
