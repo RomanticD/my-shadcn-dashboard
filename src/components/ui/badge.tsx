@@ -18,7 +18,12 @@ const badgeVariants = cva(
         success:
           'border-transparent bg-green-500 text-white [a&]:hover:bg-green-600/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40',
         outline:
-          'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground'
+          'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        gold: 'border-transparent bg-amber-500 text-white [a&]:hover:bg-amber-600/90 focus-visible:ring-amber-500/20 dark:focus-visible:ring-amber-500/40',
+        silver:
+          'border-transparent bg-gray-300 text-gray-800 [a&]:hover:bg-gray-400/90 focus-visible:ring-gray-300/20 dark:focus-visible:ring-gray-300/40 dark:bg-gray-400 dark:text-gray-900',
+        bronze:
+          'border-transparent bg-amber-700 text-white [a&]:hover:bg-amber-800/90 focus-visible:ring-amber-700/20 dark:focus-visible:ring-amber-700/40'
       }
     },
     defaultVariants: {

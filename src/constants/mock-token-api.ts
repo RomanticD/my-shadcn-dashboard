@@ -28,6 +28,9 @@ export const fakeTokens = {
       return formatDate(date);
     });
 
+    // Dog values for tokens
+    const dogValues = ['金狗', '银狗', '铜狗', null];
+
     function generateRandomTokenData(id: number): Token {
       const platform = faker.helpers.arrayElement(platforms);
       const chain = faker.helpers.arrayElement(chains);
@@ -70,7 +73,7 @@ export const fakeTokens = {
             max: 10000,
             fractionDigits: 2
           }),
-          dog: faker.animal.dog(),
+          dog: faker.helpers.arrayElement(dogValues),
           zeroTimeSeconds: faker.number.int({ min: 60, max: 3600 })
         }
       };

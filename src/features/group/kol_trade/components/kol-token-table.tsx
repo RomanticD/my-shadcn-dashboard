@@ -156,7 +156,7 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
   });
 
   return (
-    <div className='bg-muted/50 space-y-2 rounded-md p-4'>
+    <div className='bg-muted/50 space-y-4 rounded-md p-4'>
       <div className='flex items-center justify-between'>
         <h4 className='text-sm font-semibold'>KOL Details</h4>
         <Input
@@ -168,7 +168,7 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
       </div>
 
       <div className='rounded-md border'>
-        <ScrollArea className='max-h-[250px]'>
+        <ScrollArea className='h-[200px]'>
           <Table>
             <TableHeader>
               {kolTable.getHeaderGroups().map((headerGroup) => (
@@ -215,7 +215,12 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
         </ScrollArea>
       </div>
 
-      <DataTablePagination table={kolTable} pageSizeOptions={[5, 10, 20, 50]} />
+      <div className='pt-2 pb-1'>
+        <DataTablePagination
+          table={kolTable}
+          pageSizeOptions={[5, 10, 20, 50]}
+        />
+      </div>
     </div>
   );
 };
@@ -233,7 +238,7 @@ function CustomDataTablePagination<TData>({
   return (
     <div
       className={cn(
-        'flex w-full flex-col-reverse items-center justify-between gap-4 sm:flex-row sm:gap-8',
+        'flex w-full flex-col items-center justify-between gap-4 overflow-visible py-2 sm:flex-row sm:gap-8',
         className
       )}
     >
@@ -247,7 +252,7 @@ function CustomDataTablePagination<TData>({
           <>共 {table.getFilteredRowModel().rows.length} 行</>
         )}
       </div>
-      <div className='flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8'>
+      <div className='flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8'>
         <div className='flex items-center space-x-2'>
           <p className='text-sm font-medium whitespace-nowrap'>每页行数</p>
           <Select
@@ -603,10 +608,12 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
           </ScrollArea>
         </div>
 
-        <CustomDataTablePagination
-          table={table}
-          pageSizeOptions={[5, 10, 20, 50, 100]}
-        />
+        <div className='mt-4 pt-2'>
+          <CustomDataTablePagination
+            table={table}
+            pageSizeOptions={[5, 10, 20, 50, 100]}
+          />
+        </div>
       </div>
     </div>
   );

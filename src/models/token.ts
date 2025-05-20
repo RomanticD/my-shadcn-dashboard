@@ -9,7 +9,7 @@ export interface TokenMetadata {
   debotTransactions: number;
   maxPriceIncrease: number;
   maxPrice: number;
-  dog: string;
+  dog: string | null;
   zeroTimeSeconds: number;
 }
 

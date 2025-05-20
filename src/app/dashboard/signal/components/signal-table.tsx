@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { ChevronDown, Settings2, XCircle } from 'lucide-react';
+import { ChevronDown, Settings2, XCircle, CircleDot } from 'lucide-react';
 import { CaretSortIcon, Cross2Icon } from '@radix-ui/react-icons';
 
 import { Button } from '@/components/ui/button';
@@ -105,10 +105,13 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     const dogs = Array.from(new Set(data.map((item) => item.dog))).filter(
       Boolean
     ) as string[];
-    return dogs.map((dog) => ({
-      label: dog,
-      value: dog
-    }));
+    return [
+      ...dogs.map((dog) => ({
+        label: dog,
+        value: dog
+      })),
+      { label: 'None', value: '' }
+    ];
   }, [data]);
 
   const columns: ColumnDef<TokenData>[] = [
@@ -153,8 +156,27 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
       header: 'Dog',
       cell: ({ row }) => {
         const dog = row.getValue('dog') as string | null;
+
+        if (!dog) {
+          return <div className='text-muted-foreground text-sm'>-</div>;
+        }
+
+        let badgeVariant = 'outline';
+        let badgeText = dog;
+
+        if (dog === '金狗') {
+          badgeVariant = 'gold';
+        } else if (dog === '银狗') {
+          badgeVariant = 'silver';
+        } else if (dog === '铜狗') {
+          badgeVariant = 'bronze';
+        }
+
         return (
-          <div>{dog ? <Badge variant='outline'>{dog}</Badge> : 'None'}</div>
+          <Badge variant={badgeVariant as any} className='capitalize'>
+            <CircleDot className='mr-1 h-3.5 w-3.5' />
+            {badgeText}
+          </Badge>
         );
       },
       filterFn: (row, id, value: string[]) => {
@@ -331,7 +353,7 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
         {table.getColumn('dog') && (
           <DataTableFacetedFilter
             column={table.getColumn('dog')}
-            title='筛选狗子'
+            title='筛选狗种类'
             options={uniqueDogs}
             multiple
           />

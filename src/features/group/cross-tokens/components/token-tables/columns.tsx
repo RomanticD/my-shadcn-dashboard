@@ -11,7 +11,10 @@ import {
   Copy,
   Text,
   XCircle,
-  CalendarDays
+  CalendarDays,
+  AlertCircle,
+  Clock,
+  CircleDot
 } from 'lucide-react';
 import {
   ALERT_OPTIONS,
@@ -27,7 +30,7 @@ import {
   TooltipTrigger,
   TooltipContent
 } from '@/components/ui/tooltip';
-import { TokenDetailCell } from './token-detail-cell';
+import { format } from 'date-fns';
 
 const booleanFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
   if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
@@ -37,6 +40,12 @@ const booleanFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
 };
 
 const multiSelectFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
+  if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+  const value = row.getValue(columnId) as string;
+  return filterValue.includes(value);
+};
+
+const dogFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
   if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
   const value = row.getValue(columnId) as string;
   return filterValue.includes(value);
@@ -56,9 +65,6 @@ const AddressCell = ({ value, chain }: { value: string; chain: string }) => {
 
   return (
     <div className='flex items-center gap-2'>
-      <div className='max-w-[140px] truncate font-mono text-xs' title={value}>
-        {value}
-      </div>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -96,6 +102,12 @@ const AddressCell = ({ value, chain }: { value: string; chain: string }) => {
       </TooltipProvider>
     </div>
   );
+};
+
+// Format dates for display
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A';
+  return format(new Date(dateString), 'MM/dd/yyyy');
 };
 
 export const columns: ColumnDef<Token>[] = [
@@ -227,8 +239,135 @@ export const columns: ColumnDef<Token>[] = [
     }
   },
   {
-    id: 'details',
-    header: 'Details',
-    cell: ({ row }) => <TokenDetailCell token={row.original} />
+    id: 'firstAlertTime',
+    accessorFn: (row) => row.metadata.firstAlertTime,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='First Alert' />
+    ),
+    cell: ({ row }) => (
+      <div>{formatDate(row.original.metadata.firstAlertTime)}</div>
+    ),
+    enableSorting: true
+  },
+  {
+    id: 'firstTransactionTime',
+    accessorFn: (row) => row.metadata.firstTransactionTime,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='First Tx' />
+    ),
+    cell: ({ row }) => (
+      <div>{formatDate(row.original.metadata.firstTransactionTime)}</div>
+    ),
+    enableSorting: true
+  },
+  {
+    id: 'alertCount',
+    accessorFn: (row) => row.metadata.alertCount,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Alert Count' />
+    ),
+    cell: ({ row }) => <div>{row.original.metadata.alertCount}</div>,
+    enableSorting: true
+  },
+  {
+    id: 'debotVolume',
+    accessorFn: (row) => row.metadata.debotVolume,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Debot Vol' />
+    ),
+    cell: ({ row }) => (
+      <div>{formatNumber(row.original.metadata.debotVolume)}</div>
+    ),
+    enableSorting: true
+  },
+  {
+    id: 'debotTransactions',
+    accessorFn: (row) => row.metadata.debotTransactions,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Debot Tx' />
+    ),
+    cell: ({ row }) => (
+      <div>{formatNumber(row.original.metadata.debotTransactions, 0)}</div>
+    ),
+    enableSorting: true
+  },
+  {
+    id: 'maxPriceIncrease',
+    accessorFn: (row) => row.metadata.maxPriceIncrease,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Max Price Inc' />
+    ),
+    cell: ({ row }) => (
+      <div>{formatNumber(row.original.metadata.maxPriceIncrease)}%</div>
+    ),
+    enableSorting: true
+  },
+  {
+    id: 'maxPrice',
+    accessorFn: (row) => row.metadata.maxPrice,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Max Price' />
+    ),
+    cell: ({ row }) => (
+      <div>${formatNumber(row.original.metadata.maxPrice)}</div>
+    ),
+    enableSorting: true
+  },
+  {
+    id: 'dog',
+    accessorFn: (row) => row.metadata.dog,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Dog' />
+    ),
+    cell: ({ row }) => {
+      const dogValue = row.original.metadata.dog;
+
+      if (!dogValue) {
+        return <div className='text-muted-foreground text-sm'>-</div>;
+      }
+
+      let badgeVariant = 'outline';
+      let badgeText = dogValue;
+
+      if (dogValue === '金狗') {
+        badgeVariant = 'gold';
+        badgeText = '金狗';
+      } else if (dogValue === '银狗') {
+        badgeVariant = 'silver';
+        badgeText = '银狗';
+      } else if (dogValue === '铜狗') {
+        badgeVariant = 'bronze';
+        badgeText = '铜狗';
+      }
+
+      return (
+        <Badge variant={badgeVariant as any} className='capitalize'>
+          <CircleDot className='mr-1 h-3.5 w-3.5' />
+          {badgeText}
+        </Badge>
+      );
+    },
+    enableColumnFilter: true,
+    filterFn: dogFilterFn,
+    meta: {
+      label: 'Dog',
+      variant: 'multiSelect',
+      options: [
+        { label: '金狗', value: '金狗' },
+        { label: '银狗', value: '银狗' },
+        { label: '铜狗', value: '铜狗' },
+        { label: 'None', value: '' }
+      ]
+    },
+    enableSorting: true
+  },
+  {
+    id: 'zeroTimeSeconds',
+    accessorFn: (row) => row.metadata.zeroTimeSeconds,
+    header: ({ column }: { column: Column<Token, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Zero Time' />
+    ),
+    cell: ({ row }) => <div>{row.original.metadata.zeroTimeSeconds}s</div>,
+    enableSorting: true
   }
 ];
