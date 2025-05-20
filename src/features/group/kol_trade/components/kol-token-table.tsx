@@ -79,7 +79,7 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
   ]);
   const [kolPagination, setKolPagination] = useState({
     pageIndex: 0,
-    pageSize: 5 // Smaller default page size for the details table
+    pageSize: 10 // Increased default page size for better visibility
   });
 
   // Filter KOLs based on search input
@@ -156,7 +156,7 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
   });
 
   return (
-    <div className='bg-muted/50 space-y-4 rounded-md p-4'>
+    <div className='bg-muted/50 space-y-2 rounded-md p-4'>
       <div className='flex items-center justify-between'>
         <h4 className='text-sm font-semibold'>KOL Details</h4>
         <Input
@@ -168,49 +168,51 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
       </div>
 
       <div className='rounded-md border'>
-        <Table>
-          <TableHeader>
-            {kolTable.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {kolTable.getRowModel().rows.length ? (
-              kolTable.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+        <ScrollArea className='max-h-[250px]'>
+          <Table>
+            <TableHeader>
+              {kolTable.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={kolColumns.length}
-                  className='h-24 text-center'
-                >
-                  No results found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {kolTable.getRowModel().rows.length ? (
+                kolTable.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={kolColumns.length}
+                    className='h-24 text-center'
+                  >
+                    No results found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </div>
 
       <DataTablePagination table={kolTable} pageSizeOptions={[5, 10, 20, 50]} />
@@ -231,7 +233,7 @@ function CustomDataTablePagination<TData>({
   return (
     <div
       className={cn(
-        'flex w-full flex-col-reverse items-center justify-between gap-4 overflow-visible p-1 sm:flex-row sm:gap-8',
+        'flex w-full flex-col-reverse items-center justify-between gap-4 sm:flex-row sm:gap-8',
         className
       )}
     >
@@ -275,7 +277,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to first page'
             variant='outline'
             size='icon'
-            className='hidden size-7 lg:flex'
+            className='hidden size-8 lg:flex'
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
@@ -285,7 +287,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to previous page'
             variant='outline'
             size='icon'
-            className='size-7'
+            className='size-8'
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -295,7 +297,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to next page'
             variant='outline'
             size='icon'
-            className='size-7'
+            className='size-8'
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -305,7 +307,7 @@ function CustomDataTablePagination<TData>({
             aria-label='Go to last page'
             variant='outline'
             size='icon'
-            className='hidden size-7 lg:flex'
+            className='hidden size-8 lg:flex'
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
@@ -473,138 +475,139 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
   });
 
   return (
-    <div className='space-y-4 p-6'>
-      <div className='flex flex-wrap items-center gap-2 py-4'>
-        <Input
-          placeholder='Search by KOL name or username...'
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className='max-w-sm'
-        />
-
-        {table.getColumn('chain') && (
-          <DataTableFacetedFilter
-            title='筛选链'
-            options={chainOptions}
-            column={table.getColumn('chain')}
-            multiple
+    <div className='bg-background rounded-lg border shadow-sm'>
+      <div className='space-y-4 p-4'>
+        <div className='flex flex-wrap items-center gap-2 py-4'>
+          <Input
+            placeholder='Search by KOL name or username...'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className='max-w-sm'
           />
-        )}
 
-        {table.getColumn('is_signaled') && (
-          <DataTableFacetedFilter
-            title='筛选告警'
-            options={signalOptions}
-            column={table.getColumn('is_signaled')}
-            multiple
-          />
-        )}
+          {table.getColumn('chain') && (
+            <DataTableFacetedFilter
+              title='筛选链'
+              options={chainOptions}
+              column={table.getColumn('chain')}
+              multiple
+            />
+          )}
 
-        {isFiltered && (
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={resetFilters}
-            className='h-8 border-dashed px-2 lg:px-3'
-          >
-            <XCircle className='mr-2 h-4 w-4' />
-            Reset
-          </Button>
-        )}
+          {table.getColumn('is_signaled') && (
+            <DataTableFacetedFilter
+              title='筛选告警'
+              options={signalOptions}
+              column={table.getColumn('is_signaled')}
+              multiple
+            />
+          )}
 
-        <div className='ml-auto'>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='sm' className='ml-auto h-8'>
-                <Settings2 className='mr-2 h-4 w-4' />
-                View
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className='capitalize'
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id.replace('_', ' ')}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isFiltered && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={resetFilters}
+              className='h-8 border-dashed px-2 lg:px-3'
+            >
+              <XCircle className='mr-2 h-4 w-4' />
+              Reset
+            </Button>
+          )}
+
+          <div className='ml-auto'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline' size='sm' className='ml-auto h-8'>
+                  <Settings2 className='mr-2 h-4 w-4' />
+                  View
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className='capitalize'
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id.replace('_', ' ')}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
 
-      <div className='rounded-md border'>
-        <ScrollArea className='h-[calc(100vh-350px)] max-h-[400px]'>
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <>
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    {row.getIsExpanded() && (
-                      <TableRow>
-                        <TableCell colSpan={columns.length} className='p-0'>
-                          <KolDetailsTable kols={row.original.kols_details} />
-                        </TableCell>
+        <div className='rounded-md border'>
+          <ScrollArea className='h-[550px]'>
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <>
+                      <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
                       </TableRow>
-                    )}
-                  </>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className='h-24 text-center'
-                  >
-                    No results found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </div>
+                      {row.getIsExpanded() && (
+                        <TableRow>
+                          <TableCell colSpan={columns.length} className='p-0'>
+                            <KolDetailsTable kols={row.original.kols_details} />
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className='h-24 text-center'
+                    >
+                      No results found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
 
-      <CustomDataTablePagination
-        table={table}
-        pageSizeOptions={[5, 10, 20, 50, 100]}
-        className='mt-2 border-t pt-4'
-      />
+        <CustomDataTablePagination
+          table={table}
+          pageSizeOptions={[5, 10, 20, 50, 100]}
+        />
+      </div>
     </div>
   );
 }

@@ -30,15 +30,15 @@ export default function KolPage() {
   }, []);
 
   return (
-    <div className='container mx-auto mb-4 space-y-6 p-6 pb-8'>
+    <div className='flex flex-col gap-4 p-4'>
       <h1 className='text-3xl font-bold'>KOL Trading Dashboard</h1>
 
-      <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <KolTokenBarChart data={topTokens} />
         <KolActiveBarChart data={mostActiveKols} />
       </div>
 
-      <div className='bg-background rounded-lg border shadow-sm'>
+      <div className='mt-4'>
         <KolTokenTable data={tableData} />
       </div>
     </div>
