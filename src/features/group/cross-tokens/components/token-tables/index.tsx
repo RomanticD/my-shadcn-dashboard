@@ -26,6 +26,7 @@ export function TokenTable<TData, TValue>({
   columns
 }: TokenTableParams<TData, TValue>) {
   const [pageSize] = useQueryState('perPage', parseAsInteger.withDefault(10));
+  // Initialize with all columns visible by default, which prevents columns from disappearing when sorting
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -34,6 +35,11 @@ export function TokenTable<TData, TValue>({
     data,
     columns,
     enableRowSelection: true,
+    initialState: {
+      pagination: {
+        pageSize
+      }
+    },
     state: {
       columnVisibility,
       rowSelection,

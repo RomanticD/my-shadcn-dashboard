@@ -15,7 +15,16 @@ import {
   ExpandedState,
   getExpandedRowModel
 } from '@tanstack/react-table';
-import { ChevronDown, Settings2, ChevronRight, X, XCircle } from 'lucide-react';
+import {
+  ChevronDown,
+  Settings2,
+  ChevronRight,
+  X,
+  XCircle,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-react';
+import { CaretSortIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -180,15 +189,52 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
           <Table>
             <TableHeader>
               {kolTable.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className='bg-muted'>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        'p-0', // Reset TableHead padding, Button will handle it.
+                        header.column.getCanSort() ? 'cursor-pointer' : ''
+                      )}
+                    >
+                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                        <Button
+                          variant='ghost'
+                          onClick={header.column.getToggleSortingHandler()}
+                          className='hover:bg-muted flex h-full w-full items-center justify-center rounded-md px-3 py-3 text-center'
+                        >
+                          <span className='flex-grow text-sm font-medium'>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </span>
+                          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+                            {header.column.getIsSorted() === 'asc' ? (
+                              <ArrowUp className='h-4 w-4' />
+                            ) : header.column.getIsSorted() === 'desc' ? (
+                              <ArrowDown className='h-4 w-4' />
+                            ) : (
+                              <CaretSortIcon className='h-4 w-4' />
+                            )}
+                          </div>
+                        </Button>
+                      ) : (
+                        <div
+                          className={cn(
+                            'text-muted-foreground px-3 py-3 text-center text-sm font-medium',
+                            header.column.id === 'expander' && 'w-[50px]'
+                          )}
+                        >
+                          {' '}
+                          {/* Removed bg-muted rounded-md */}
+                          {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
+                        </div>
+                      )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -646,15 +692,52 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
             <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className='bg-muted'>
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
+                      <TableHead
+                        key={header.id}
+                        className={cn(
+                          'p-0', // Reset TableHead padding, Button will handle it.
+                          header.column.getCanSort() ? 'cursor-pointer' : ''
+                        )}
+                      >
+                        {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                          <Button
+                            variant='ghost'
+                            onClick={header.column.getToggleSortingHandler()}
+                            className='hover:bg-muted flex h-full w-full items-center justify-center rounded-md px-3 py-3 text-center'
+                          >
+                            <span className='flex-grow text-sm font-medium'>
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                            </span>
+                            <div className='ml-2 h-4 w-4 flex-shrink-0'>
+                              {header.column.getIsSorted() === 'asc' ? (
+                                <ArrowUp className='h-4 w-4' />
+                              ) : header.column.getIsSorted() === 'desc' ? (
+                                <ArrowDown className='h-4 w-4' />
+                              ) : (
+                                <CaretSortIcon className='h-4 w-4' />
+                              )}
+                            </div>
+                          </Button>
+                        ) : (
+                          <div
+                            className={cn(
+                              'text-muted-foreground px-3 py-3 text-center text-sm font-medium',
+                              header.column.id === 'expander' && 'w-[50px]'
+                            )}
+                          >
+                            {' '}
+                            {/* Removed bg-muted rounded-md */}
+                            {flexRender(
                               header.column.columnDef.header,
                               header.getContext()
                             )}
+                          </div>
+                        )}
                       </TableHead>
                     ))}
                   </TableRow>

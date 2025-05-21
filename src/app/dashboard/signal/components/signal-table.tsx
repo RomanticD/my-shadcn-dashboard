@@ -13,17 +13,17 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { ChevronDown, Settings2, XCircle, CircleDot } from 'lucide-react';
-import { CaretSortIcon, Cross2Icon } from '@radix-ui/react-icons';
+import {
+  Settings2,
+  XCircle,
+  CircleDot,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-react';
+import { CaretSortIcon } from '@radix-ui/react-icons';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -117,7 +117,11 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
   const columns: ColumnDef<TokenData>[] = [
     {
       accessorKey: 'token_name',
-      header: 'Token Name',
+      header: () => (
+        <div className='text-muted-foreground px-3 py-3 text-center text-sm font-medium'>
+          Token Name
+        </div>
+      ),
       cell: ({ row }) => {
         return (
           <div className='flex max-w-[200px] space-x-2'>
@@ -130,7 +134,11 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'chain',
-      header: 'Chain',
+      header: () => (
+        <div className='text-muted-foreground px-3 py-3 text-center text-sm font-medium'>
+          Chain
+        </div>
+      ),
       cell: ({ row }) => <div>{row.getValue('chain')}</div>,
       filterFn: (row, id, value: string[]) => {
         return value.includes(row.getValue(id));
@@ -138,12 +146,35 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'symbol',
-      header: 'Symbol',
+      header: () => (
+        <div className='text-muted-foreground px-3 py-3 text-center text-sm font-medium'>
+          Symbol
+        </div>
+      ),
       cell: ({ row }) => <div>{row.getValue('symbol')}</div>
     },
     {
       accessorKey: 'first_signal_time',
-      header: 'First Signal Time',
+      header: ({ column }) => (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting()}
+          className='hover:bg-muted flex h-auto w-full items-center justify-center rounded-md px-3 py-3 text-center'
+        >
+          <span className='flex-grow text-sm font-medium'>
+            First Signal Time
+          </span>
+          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDown className='h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUp className='h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='h-4 w-4' />
+            )}
+          </div>
+        </Button>
+      ),
       cell: ({ row }) => {
         const timestamp = row.getValue('first_signal_time') as number;
         const date = new Date(timestamp * 1000);
@@ -153,7 +184,11 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'dog',
-      header: 'Dog',
+      header: () => (
+        <div className='text-muted-foreground px-3 py-3 text-center text-sm font-medium'>
+          Dog
+        </div>
+      ),
       cell: ({ row }) => {
         const dog = row.getValue('dog') as string | null;
 
@@ -187,18 +222,26 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'transaction_amount',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant='ghost'
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className='px-0 font-medium'
-          >
+      header: ({ column }) => (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting()}
+          className='hover:bg-muted flex h-auto w-full items-center justify-center rounded-md px-3 py-3 text-center'
+        >
+          <span className='flex-grow text-sm font-medium'>
             Transaction Amount
-            <CaretSortIcon className='ml-2 h-4 w-4' />
-          </Button>
-        );
-      },
+          </span>
+          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDown className='h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUp className='h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='h-4 w-4' />
+            )}
+          </div>
+        </Button>
+      ),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue('transaction_amount'));
         const formatted = new Intl.NumberFormat('en-US', {
@@ -211,18 +254,26 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'transaction_count',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant='ghost'
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className='px-0 font-medium'
-          >
+      header: ({ column }) => (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting()}
+          className='hover:bg-muted flex h-auto w-full items-center justify-center rounded-md px-3 py-3 text-center'
+        >
+          <span className='flex-grow text-sm font-medium'>
             Transaction Count
-            <CaretSortIcon className='ml-2 h-4 w-4' />
-          </Button>
-        );
-      },
+          </span>
+          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDown className='h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUp className='h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='h-4 w-4' />
+            )}
+          </div>
+        </Button>
+      ),
       cell: ({ row }) => {
         return (
           <div className='text-right'>{row.getValue('transaction_count')}</div>
@@ -232,7 +283,24 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'max_increase',
-      header: 'Max Increase',
+      header: ({ column }) => (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting()}
+          className='hover:bg-muted flex h-auto w-full items-center justify-center rounded-md px-3 py-3 text-center'
+        >
+          <span className='flex-grow text-sm font-medium'>Max Increase</span>
+          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDown className='h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUp className='h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='h-4 w-4' />
+            )}
+          </div>
+        </Button>
+      ),
       cell: ({ row }) => {
         const value = parseFloat(row.getValue('max_increase'));
         const formatted = new Intl.NumberFormat('en-US', {
@@ -246,7 +314,24 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'max_price',
-      header: 'Max Price',
+      header: ({ column }) => (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting()}
+          className='hover:bg-muted flex h-auto w-full items-center justify-center rounded-md px-3 py-3 text-center'
+        >
+          <span className='flex-grow text-sm font-medium'>Max Price</span>
+          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDown className='h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUp className='h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='h-4 w-4' />
+            )}
+          </div>
+        </Button>
+      ),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue('max_price'));
         const formatted = new Intl.NumberFormat('en-US', {
@@ -259,7 +344,24 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'to_zero_seconds',
-      header: 'To Zero',
+      header: ({ column }) => (
+        <Button
+          variant='ghost'
+          onClick={() => column.toggleSorting()}
+          className='hover:bg-muted flex h-auto w-full items-center justify-center rounded-md px-3 py-3 text-center'
+        >
+          <span className='flex-grow text-sm font-medium'>To Zero Seconds</span>
+          <div className='ml-2 h-4 w-4 flex-shrink-0'>
+            {column.getIsSorted() === 'desc' ? (
+              <ArrowDown className='h-4 w-4' />
+            ) : column.getIsSorted() === 'asc' ? (
+              <ArrowUp className='h-4 w-4' />
+            ) : (
+              <CaretSortIcon className='h-4 w-4' />
+            )}
+          </div>
+        </Button>
+      ),
       cell: ({ row }) => {
         const seconds = row.getValue('to_zero_seconds') as number;
         return (
@@ -272,7 +374,11 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
     },
     {
       accessorKey: 'time_range',
-      header: 'Time Range',
+      header: () => (
+        <div className='text-muted-foreground px-3 py-3 text-center text-sm font-medium'>
+          Time Range
+        </div>
+      ),
       cell: ({ row }) => <div>{row.getValue('time_range')}</div>,
       filterFn: (row, id, value: string[]) => {
         return value.includes(row.getValue(id));
@@ -422,7 +528,7 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className='bg-muted'>
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead key={header.id}>
