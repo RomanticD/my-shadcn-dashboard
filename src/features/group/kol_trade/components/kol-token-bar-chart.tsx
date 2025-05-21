@@ -22,6 +22,7 @@ import {
 interface TokenBarChartProps {
   data: {
     address: string;
+    token_name: string;
     chain: string;
     buy_counts: number;
   }[];
@@ -36,6 +37,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <div className='text-sm'>
           <span className='font-medium'>Chain: </span>
           {payload[0]?.payload.chain}
+        </div>
+        <div className='text-sm'>
+          <span className='font-medium'>Address: </span>
+          {payload[0]?.payload.address}
         </div>
         <div className='text-sm'>
           <span className='font-medium'>Buy Counts: </span>
@@ -69,7 +74,7 @@ export function KolTokenBarChart({ data }: TokenBarChartProps) {
             >
               <CartesianGrid strokeDasharray='3 3' vertical={false} />
               <XAxis
-                dataKey='address'
+                dataKey='token_name'
                 tickLine={false}
                 axisLine={false}
                 angle={-45}

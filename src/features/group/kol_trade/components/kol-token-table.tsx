@@ -27,6 +27,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent
+} from '@/components/ui/tooltip';
+import { Copy, ExternalLink } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -61,6 +69,8 @@ interface KolDetail {
 
 interface TokenData {
   token_address: string;
+  token_name: string;
+  symbol: string;
   chain: string;
   is_signaled: boolean;
   buy_sum_counts: number;
@@ -129,9 +139,7 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
     {
       accessorKey: 'buy_counts',
       header: 'Buy Counts',
-      cell: ({ row }) => (
-        <div className='text-right'>{row.getValue('buy_counts')}</div>
-      )
+      cell: ({ row }) => <div>{row.getValue('buy_counts')}</div>
     },
     {
       accessorKey: 'store_time',
@@ -324,6 +332,86 @@ function CustomDataTablePagination<TData>({
   );
 }
 
+// Token Address Cell Component
+const TokenAddressCell = ({
+  value,
+  chain
+}: {
+  value: string;
+  chain: string;
+}) => {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    toast.success('地址已复制', {
+      description: '代币地址已复制到剪贴板'
+    });
+  };
+
+  const handleOpenExternalLink = () => {
+    window.open(`https://debot.ai/token/${chain}/${value}`, '_blank');
+  };
+
+  return (
+    <div className='flex items-center justify-center gap-2'>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-6 w-6'
+              onClick={handleCopy}
+            >
+              <Copy className='h-3.5 w-3.5' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>复制地址</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-6 w-6'
+              onClick={handleOpenExternalLink}
+            >
+              <ExternalLink className='h-3.5 w-3.5' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>在 Debot 上查看</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+};
+
+// Symbol Cell Component
+const SymbolCell = ({ symbol }: { symbol: string }) => {
+  return (
+    <div className='flex items-center justify-center'>
+      <div className='h-8 w-8 overflow-hidden rounded-full'>
+        <img
+          src={symbol}
+          alt='Token'
+          className='h-full w-full object-cover'
+          onError={(e) => {
+            // 如果图像加载失败，显示默认图像
+            (e.target as HTMLImageElement).src =
+              'https://assets.coingecko.com/coins/images/16119/small/coin-blank.png';
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
 export function KolTokenTable({ data }: KolTokenTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -392,20 +480,26 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
       )
     },
     {
+      accessorKey: 'symbol',
+      header: 'Symbol',
+      cell: ({ row }) => <SymbolCell symbol={row.getValue('symbol')} />
+    },
+    {
+      accessorKey: 'token_name',
+      header: 'Token Name',
+      cell: ({ row }) => (
+        <div className='font-medium'>{row.getValue('token_name')}</div>
+      )
+    },
+    {
       accessorKey: 'token_address',
       header: 'Token Address',
-      cell: ({ row }) => {
-        const address = row.getValue('token_address') as string;
-        const shortAddress = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-        return (
-          <div className='font-medium'>
-            <span className='font-mono'>{shortAddress}</span>
-            <span className='text-muted-foreground block text-xs'>
-              {address}
-            </span>
-          </div>
-        );
-      }
+      cell: ({ row }) => (
+        <TokenAddressCell
+          value={row.getValue('token_address')}
+          chain={row.getValue('chain')}
+        />
+      )
     },
     {
       accessorKey: 'chain',
@@ -435,18 +529,14 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
       accessorKey: 'buy_sum_counts',
       header: 'Total Buy Counts',
       cell: ({ row }) => (
-        <div className='text-right font-medium'>
-          {row.getValue('buy_sum_counts')}
-        </div>
+        <div className='font-medium'>{row.getValue('buy_sum_counts')}</div>
       )
     },
     {
       accessorKey: 'kols_count',
       header: 'KOLs Count',
       cell: ({ row }) => (
-        <div className='text-right font-medium'>
-          {row.original.kols_details.length}
-        </div>
+        <div className='font-medium'>{row.original.kols_details.length}</div>
       )
     }
   ];

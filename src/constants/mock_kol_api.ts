@@ -13,6 +13,8 @@ export interface TokenDetails {
   kols_details: KolDetail[];
   buy_sum_counts: number;
   is_signaled: boolean;
+  token_name: string;
+  symbol: string;
 }
 
 export interface TokensData {
@@ -135,6 +137,165 @@ const chainTokenAddresses = {
   ]
 };
 
+// Mock token names and symbols for each chain
+const chainTokenData = {
+  bsc: [
+    {
+      name: 'Pancake',
+      symbol:
+        'https://assets.coingecko.com/coins/images/12632/small/pancakeswap-cake-logo.png'
+    },
+    {
+      name: 'BNB',
+      symbol:
+        'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png'
+    },
+    {
+      name: 'BUSD',
+      symbol: 'https://assets.coingecko.com/coins/images/9576/small/BUSD.png'
+    },
+    {
+      name: 'Baby Doge',
+      symbol:
+        'https://assets.coingecko.com/coins/images/16125/small/babydoge.jpg'
+    },
+    {
+      name: 'BscPad',
+      symbol:
+        'https://assets.coingecko.com/coins/images/14431/small/bscpad_logo.png'
+    },
+    {
+      name: 'Binance USD',
+      symbol: 'https://assets.coingecko.com/coins/images/9576/small/BUSD.png'
+    },
+    {
+      name: 'TrueUSD',
+      symbol: 'https://assets.coingecko.com/coins/images/3449/small/tusd.png'
+    },
+    {
+      name: 'Binance Coin',
+      symbol:
+        'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png'
+    }
+  ],
+  solana: [
+    {
+      name: 'Solana',
+      symbol: 'https://assets.coingecko.com/coins/images/4128/small/solana.png'
+    },
+    {
+      name: 'Wrapped SOL',
+      symbol: 'https://assets.coingecko.com/coins/images/4128/small/solana.png'
+    },
+    {
+      name: 'Raydium',
+      symbol:
+        'https://assets.coingecko.com/coins/images/13928/small/PSigc4ie_400x400.jpg'
+    },
+    {
+      name: 'Serum',
+      symbol:
+        'https://assets.coingecko.com/coins/images/11970/small/serum-logo.png'
+    },
+    {
+      name: 'Kin',
+      symbol: 'https://assets.coingecko.com/coins/images/959/small/kin-logo.png'
+    },
+    {
+      name: 'Mango',
+      symbol:
+        'https://assets.coingecko.com/coins/images/14773/small/Mango_Gradient_Circle.png'
+    },
+    {
+      name: 'Star Atlas',
+      symbol:
+        'https://assets.coingecko.com/coins/images/17659/small/ATLAS_Icon_Gradient.png'
+    },
+    {
+      name: 'Marinade SOL',
+      symbol:
+        'https://assets.coingecko.com/coins/images/16746/small/marinade_finance_logo.PNG'
+    }
+  ],
+  ethereum: [
+    {
+      name: 'Tether',
+      symbol: 'https://assets.coingecko.com/coins/images/325/small/Tether.png'
+    },
+    {
+      name: 'Wrapped Ether',
+      symbol: 'https://assets.coingecko.com/coins/images/2518/small/weth.png'
+    },
+    {
+      name: 'USD Coin',
+      symbol:
+        'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png'
+    },
+    {
+      name: 'Wrapped Bitcoin',
+      symbol:
+        'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png'
+    },
+    {
+      name: 'Uniswap',
+      symbol: 'https://assets.coingecko.com/coins/images/12504/small/uni.jpg'
+    },
+    {
+      name: 'Aave',
+      symbol: 'https://assets.coingecko.com/coins/images/12645/small/AAVE.png'
+    },
+    {
+      name: 'Dai',
+      symbol:
+        'https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png'
+    },
+    {
+      name: 'Chainlink',
+      symbol:
+        'https://assets.coingecko.com/coins/images/877/small/chainlink-new-logo.png'
+    }
+  ],
+  arbitrum: [
+    {
+      name: 'Arbitrum USDT',
+      symbol: 'https://assets.coingecko.com/coins/images/325/small/Tether.png'
+    },
+    {
+      name: 'Dai Stablecoin',
+      symbol:
+        'https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png'
+    },
+    {
+      name: 'Wrapped Ether',
+      symbol: 'https://assets.coingecko.com/coins/images/2518/small/weth.png'
+    },
+    {
+      name: 'GMX',
+      symbol: 'https://assets.coingecko.com/coins/images/18323/small/arbit.png'
+    },
+    {
+      name: 'Wrapped Bitcoin',
+      symbol:
+        'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png'
+    },
+    {
+      name: 'USD Coin',
+      symbol:
+        'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png'
+    },
+    {
+      name: 'Sushi',
+      symbol:
+        'https://assets.coingecko.com/coins/images/12271/small/512x512_Logo_no_chop.png'
+    },
+    {
+      name: 'ArbiNYAN',
+      symbol:
+        'https://assets.coingecko.com/coins/images/18085/small/arbinyan.PNG'
+    }
+  ]
+};
+
 // More realistic avatar URLs
 const getRandomAvatar = () => {
   const avatarSources = [
@@ -185,12 +346,14 @@ export const generateMockData = (): ChainData[] => {
     // Use predefined token addresses for each chain
     const tokenAddresses =
       chainTokenAddresses[chain as keyof typeof chainTokenAddresses];
+    const tokenInfo = chainTokenData[chain as keyof typeof chainTokenData];
 
     // Add 5-8 tokens for each chain
     const tokenCount = Math.floor(Math.random() * 4) + 5;
     for (let i = 0; i < tokenCount; i++) {
       // Use realistic token address
       const tokenAddress = tokenAddresses[i];
+      const { name, symbol } = tokenInfo[i];
 
       // Generate 3-12 KOLs for each token with more variation
       const kolCount = Math.floor(Math.random() * 10) + 3;
@@ -231,7 +394,9 @@ export const generateMockData = (): ChainData[] => {
       tokensData[tokenAddress] = {
         kols_details: kolsDetails,
         buy_sum_counts: buySum,
-        is_signaled: Math.random() > 0.6
+        is_signaled: Math.random() > 0.6,
+        token_name: name,
+        symbol: symbol
       };
     }
 
@@ -247,12 +412,18 @@ export const generateMockData = (): ChainData[] => {
 
 // Format data for charts
 export const getTopTokensByBuyCount = (data: ChainData[], limit = 10) => {
-  const allTokens: { address: string; chain: string; buyCounts: number }[] = [];
+  const allTokens: {
+    address: string;
+    token_name: string;
+    chain: string;
+    buyCounts: number;
+  }[] = [];
 
   data.forEach((chainData) => {
     Object.entries(chainData.tokens).forEach(([address, tokenData]) => {
       allTokens.push({
         address: address,
+        token_name: tokenData.token_name,
         chain: chainData.chain,
         buyCounts: tokenData.buy_sum_counts
       });
@@ -267,6 +438,7 @@ export const getTopTokensByBuyCount = (data: ChainData[], limit = 10) => {
         token.address.substring(0, 6) +
         '...' +
         token.address.substring(token.address.length - 4),
+      token_name: token.token_name,
       chain: token.chain,
       buy_counts: token.buyCounts
     }));
@@ -320,6 +492,8 @@ export const formatTableData = (data: ChainData[]) => {
     Object.entries(chainData.tokens).forEach(([address, tokenData]) => {
       tableData.push({
         token_address: address,
+        token_name: tokenData.token_name,
+        symbol: tokenData.symbol,
         chain: chainData.chain,
         is_signaled: tokenData.is_signaled,
         buy_sum_counts: tokenData.buy_sum_counts,
