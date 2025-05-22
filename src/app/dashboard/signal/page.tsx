@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SignalLineChart } from './components/signal-line-chart';
@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { SignalLineChartSkeleton } from './components/signal-line-chart-skeleton';
+import { SimpleTableSkeleton } from '@/components/ui/table/simple-table-skeleton';
 
 // Define types for the API response
 interface TokenInfo {
@@ -239,7 +241,7 @@ const generateMockData = (): ApiResponse => {
 };
 
 // Generate mock data
-const mockData: ApiResponse = generateMockData();
+const mockData = generateMockData();
 
 // Create a full dataset with all time ranges for each day and chain
 const generateCompleteChartData = (data: DayData[]): DailyChartData => {
@@ -320,50 +322,83 @@ const extractAllTokens = (data: DayData[]): TokenTableData[] => {
 };
 
 export default function SignalPage() {
-  const chartData = generateCompleteChartData(mockData.data);
-  const allTokens = extractAllTokens(mockData.data);
+  const [chartData, setChartData] = useState<DailyChartData>({});
+  const [allTokens, setAllTokens] = useState<TokenTableData[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [dates, setDates] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [selectedDate, setSelectedDate] = useState(
-    mockData.data[0].signals.store_time
-  );
+  useEffect(() => {
+    // Set loading to true initially
+    setIsLoading(true);
 
-  const dates = mockData.data.map((item) => item.signals.store_time);
+    // Add artificial delay to simulate network request
+    setTimeout(() => {
+      const processedChartData = generateCompleteChartData(mockData.data);
+      const processedTokens = extractAllTokens(mockData.data);
+      const initialDate = mockData.data[0].signals.store_time;
+      const datesList = mockData.data.map((item) => item.signals.store_time);
+
+      setChartData(processedChartData);
+      setAllTokens(processedTokens);
+      setSelectedDate(initialDate);
+      setDates(datesList);
+
+      // Set loading to false after data is processed
+      setIsLoading(false);
+    }, 2000); // 2 second delay
+  }, []);
 
   return (
     <div className='flex flex-col gap-4 p-4'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold'>Signal Dashboard</h1>
         <div className='flex items-center gap-2'>
-          <Select value={selectedDate} onValueChange={setSelectedDate}>
-            <SelectTrigger className='w-[180px]'>
-              <SelectValue placeholder='Select date' />
-            </SelectTrigger>
-            <SelectContent>
-              {dates.map((date) => (
-                <SelectItem key={date} value={date}>
-                  {date}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!isLoading && (
+            <Select value={selectedDate} onValueChange={setSelectedDate}>
+              <SelectTrigger className='w-[180px]'>
+                <SelectValue placeholder='Select date' />
+              </SelectTrigger>
+              <SelectContent>
+                {dates.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {date}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-        <SignalLineChart
-          data={chartData[selectedDate].solana}
-          title={`Solana Signals (${selectedDate})`}
-          subtext='Count and signal count by time range'
-        />
-        <SignalLineChart
-          data={chartData[selectedDate].bsc}
-          title={`BSC Signals (${selectedDate})`}
-          subtext='Count and signal count by time range'
-        />
+        {isLoading ? (
+          <>
+            <SignalLineChartSkeleton />
+            <SignalLineChartSkeleton />
+          </>
+        ) : (
+          <>
+            <SignalLineChart
+              data={chartData[selectedDate]?.solana || []}
+              title={`Solana Signals (${selectedDate})`}
+              subtext='Count and signal count by time range'
+            />
+            <SignalLineChart
+              data={chartData[selectedDate]?.bsc || []}
+              title={`BSC Signals (${selectedDate})`}
+              subtext='Count and signal count by time range'
+            />
+          </>
+        )}
       </div>
 
       <div className='mt-4'>
-        <SignalTable data={allTokens} selectedDate={selectedDate} />
+        {isLoading ? (
+          <SimpleTableSkeleton columnCount={8} rowCount={10} />
+        ) : (
+          <SignalTable data={allTokens} selectedDate={selectedDate} />
+        )}
       </div>
     </div>
   );

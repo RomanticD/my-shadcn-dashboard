@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -29,6 +29,8 @@ import {
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 import { Icons } from '@/components/icons';
 import { tokenTrendsData } from '@/constants/tokenTrendsData';
+import { TokenTrendsLineChartSkeleton } from './components/token-trends-line-chart-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Convert timestamp to formatted date
 const formatDate = (timestamp: number): string => {
@@ -172,59 +174,126 @@ function TokenTrendsLineChart({
 }
 
 export default function TokenTrendsPage() {
-  // Get all available dates and tokens
-  const dateItems = tokenTrendsData.data.items.map((item) => ({
-    value: item.date.toString(),
-    label: formatDate(item.date)
-  }));
-
   // States
-  const [selectedDateId, setSelectedDateId] = useState(dateItems[0].value);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dateItems, setDateItems] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [selectedDateId, setSelectedDateId] = useState<string>('');
   const [selectedTokenIndex, setSelectedTokenIndex] = useState(0);
+  const [selectedDateData, setSelectedDateData] = useState<any>(null);
+  const [tokenOptions, setTokenOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [selectedToken, setSelectedToken] = useState<any>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
 
-  // Selected date data
-  const selectedDateData = tokenTrendsData.data.items.find(
-    (item) => item.date.toString() === selectedDateId
-  );
+  useEffect(() => {
+    // Set loading to true initially
+    setIsLoading(true);
 
-  // Available tokens for the selected date
-  const tokenOptions =
-    selectedDateData?.tokens.map((token, index) => ({
-      value: index.toString(),
-      label: token.token_name
-    })) || [];
+    // Add artificial delay to simulate network request
+    setTimeout(() => {
+      const items = tokenTrendsData.data.items.map((item) => ({
+        value: item.date.toString(),
+        label: formatDate(item.date)
+      }));
 
-  // Selected token data
-  const selectedToken = selectedDateData?.tokens[selectedTokenIndex];
+      setDateItems(items);
+      setSelectedDateId(items[0].value);
 
-  // Format the chart data from time_range
-  const chartData = selectedToken?.time_range || [];
+      const dateData = tokenTrendsData.data.items.find(
+        (item) => item.date.toString() === items[0].value
+      );
+
+      setSelectedDateData(dateData);
+
+      const options =
+        dateData?.tokens.map((token: any, index: number) => ({
+          value: index.toString(),
+          label: token.token_name
+        })) || [];
+
+      setTokenOptions(options);
+
+      const token = dateData?.tokens[0];
+      setSelectedToken(token);
+
+      const data = token?.time_range || [];
+      setChartData(data);
+
+      // Set loading to false after data is processed
+      setIsLoading(false);
+    }, 2000); // 2 second delay
+  }, []);
+
+  // Handle date change
+  const handleDateChange = (value: string) => {
+    setSelectedDateId(value);
+
+    const dateData = tokenTrendsData.data.items.find(
+      (item) => item.date.toString() === value
+    );
+
+    setSelectedDateData(dateData);
+
+    const options =
+      dateData?.tokens.map((token: any, index: number) => ({
+        value: index.toString(),
+        label: token.token_name
+      })) || [];
+
+    setTokenOptions(options);
+    setSelectedTokenIndex(0);
+
+    const token = dateData?.tokens[0];
+    setSelectedToken(token);
+
+    const data = token?.time_range || [];
+    setChartData(data);
+  };
+
+  // Handle token change
+  const handleTokenChange = (value: string) => {
+    const index = parseInt(value);
+    setSelectedTokenIndex(index);
+
+    const token = selectedDateData?.tokens[index];
+    setSelectedToken(token);
+
+    const data = token?.time_range || [];
+    setChartData(data);
+  };
 
   return (
     <div className='flex flex-col gap-4 p-4'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold'>代币趋势</h1>
         <div className='flex items-center gap-2'>
-          <Select value={selectedDateId} onValueChange={setSelectedDateId}>
-            <SelectTrigger className='w-[180px]'>
-              <SelectValue placeholder='选择日期' />
-            </SelectTrigger>
-            <SelectContent>
-              {dateItems.map((date) => (
-                <SelectItem key={date.value} value={date.value}>
-                  {date.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!isLoading ? (
+            <Select value={selectedDateId} onValueChange={handleDateChange}>
+              <SelectTrigger className='w-[180px]'>
+                <SelectValue placeholder='选择日期' />
+              </SelectTrigger>
+              <SelectContent>
+                {dateItems.map((date) => (
+                  <SelectItem key={date.value} value={date.value}>
+                    {date.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Skeleton className='h-10 w-[180px]' />
+          )}
         </div>
       </div>
 
-      {selectedDateData && (
+      {!isLoading && selectedDateData && (
         <div className='mt-4 flex flex-wrap items-center gap-4'>
           <Select
             value={selectedTokenIndex.toString()}
-            onValueChange={(value) => setSelectedTokenIndex(parseInt(value))}
+            onValueChange={handleTokenChange}
           >
             <SelectTrigger className='w-[240px]'>
               <SelectValue placeholder='选择代币' />
@@ -256,7 +325,12 @@ export default function TokenTrendsPage() {
         </div>
       )}
 
-      {selectedToken && (
+      {isLoading ? (
+        <div className='grid grid-cols-1 gap-4'>
+          <TokenTrendsLineChartSkeleton />
+          <TokenTrendsLineChartSkeleton />
+        </div>
+      ) : selectedToken ? (
         <>
           <div className='grid grid-cols-1 gap-4'>
             <TokenTrendsLineChart
@@ -327,7 +401,7 @@ export default function TokenTrendsPage() {
             </Card>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }
