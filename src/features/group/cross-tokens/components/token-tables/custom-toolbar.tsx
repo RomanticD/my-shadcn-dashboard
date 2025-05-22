@@ -12,7 +12,8 @@ import {
   ALERT_OPTIONS,
   PLATFORM_OPTIONS,
   CHAIN_OPTIONS,
-  STORE_TIME_OPTIONS
+  STORE_TIME_OPTIONS,
+  ZERO_TIME_OPTIONS
 } from './options';
 
 interface TokenTableToolbarProps<TData> extends React.ComponentProps<'div'> {
@@ -30,6 +31,7 @@ export function TokenTableToolbar<TData>({
   const platformColumn = table.getColumn('platform');
   const chainColumn = table.getColumn('chain');
   const storeTimeColumn = table.getColumn('storeTime');
+  const zeroTimeColumn = table.getColumn('zeroTimeSeconds');
 
   return (
     <div
@@ -88,6 +90,16 @@ export function TokenTableToolbar<TData>({
             column={chainColumn}
             title='筛选链'
             options={CHAIN_OPTIONS}
+            multiple={true}
+          />
+        )}
+
+        {/* Zero Time filter - displayed fifth, after Chain filter */}
+        {zeroTimeColumn && (
+          <DataTableFacetedFilter
+            column={zeroTimeColumn}
+            title='筛选归零'
+            options={ZERO_TIME_OPTIONS}
             multiple={true}
           />
         )}

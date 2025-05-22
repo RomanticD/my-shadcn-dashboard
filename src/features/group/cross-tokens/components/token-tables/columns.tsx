@@ -20,7 +20,8 @@ import {
   ALERT_OPTIONS,
   PLATFORM_OPTIONS,
   CHAIN_OPTIONS,
-  STORE_TIME_OPTIONS
+  STORE_TIME_OPTIONS,
+  ZERO_TIME_OPTIONS
 } from './options';
 import { formatNumber } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -108,6 +109,59 @@ const AddressCell = ({ value, chain }: { value: string; chain: string }) => {
 const formatDate = (dateString: string) => {
   if (!dateString) return 'N/A';
   return format(new Date(dateString), 'MM/dd/yyyy');
+};
+
+// Format time for display (hours, minutes, seconds only)
+const formatTime = (dateString: string) => {
+  if (!dateString) return 'N/A';
+  return format(new Date(dateString), 'HH:mm:ss');
+};
+
+// Format percentage with multiplication and single decimal place
+const formatPercentage = (value: number) => {
+  if (value === null || value === undefined) return 'N/A';
+  return (value * 100).toFixed(1);
+};
+
+// Zero time filter function
+const zeroTimeFilterFn: FilterFn<Token> = (row, columnId, filterValue) => {
+  if (filterValue.length === 0) return true;
+
+  const zeroTimeValue = row.original.metadata.zeroTimeSeconds;
+
+  return filterValue.some((option: string) => {
+    switch (option) {
+      case 'zero':
+        return zeroTimeValue === 0;
+      case '0-1000':
+        return zeroTimeValue > 0 && zeroTimeValue <= 1000;
+      case 'gt1000':
+        return zeroTimeValue > 1000;
+      default:
+        return false;
+    }
+  });
+};
+
+// Format maxPrice value to display all significant decimal places efficiently
+const formatMaxPrice = (value: number) => {
+  if (value === null || value === undefined) return 'N/A';
+
+  // Convert to string to preserve all significant digits
+  const stringValue = value.toString();
+
+  // If it's an integer or has few decimal places, return as is
+  if (!stringValue.includes('.') || stringValue.split('.')[1].length <= 2) {
+    return stringValue;
+  }
+
+  // For values with many decimal places, use scientific notation if very small
+  if (value < 0.0001) {
+    return value.toExponential(4);
+  }
+
+  // Otherwise return the full value to preserve all decimal places
+  return stringValue;
 };
 
 export const columns: ColumnDef<Token>[] = [
@@ -245,7 +299,11 @@ export const columns: ColumnDef<Token>[] = [
       <DataTableColumnHeader column={column} title='First Alert' />
     ),
     cell: ({ row }) => (
-      <div>{formatDate(row.original.metadata.firstAlertTime)}</div>
+      <div>
+        {!row.original.alert
+          ? 'N/A'
+          : formatTime(row.original.metadata.firstAlertTime)}
+      </div>
     ),
     enableSorting: true
   },
@@ -256,7 +314,11 @@ export const columns: ColumnDef<Token>[] = [
       <DataTableColumnHeader column={column} title='First Tx' />
     ),
     cell: ({ row }) => (
-      <div>{formatDate(row.original.metadata.firstTransactionTime)}</div>
+      <div>
+        {!row.original.alert
+          ? 'N/A'
+          : formatTime(row.original.metadata.firstTransactionTime)}
+      </div>
     ),
     enableSorting: true
   },
@@ -266,7 +328,11 @@ export const columns: ColumnDef<Token>[] = [
     header: ({ column }: { column: Column<Token, unknown> }) => (
       <DataTableColumnHeader column={column} title='Alert Count' />
     ),
-    cell: ({ row }) => <div>{row.original.metadata.alertCount}</div>,
+    cell: ({ row }) => (
+      <div>
+        {!row.original.alert ? 'N/A' : row.original.metadata.alertCount}
+      </div>
+    ),
     enableSorting: true
   },
   {
@@ -298,7 +364,11 @@ export const columns: ColumnDef<Token>[] = [
       <DataTableColumnHeader column={column} title='Max Price Inc' />
     ),
     cell: ({ row }) => (
-      <div>{formatNumber(row.original.metadata.maxPriceIncrease)}%</div>
+      <div>
+        {!row.original.alert
+          ? 'N/A'
+          : `${formatPercentage(row.original.metadata.maxPriceIncrease)}%`}
+      </div>
     ),
     enableSorting: true
   },
@@ -309,7 +379,11 @@ export const columns: ColumnDef<Token>[] = [
       <DataTableColumnHeader column={column} title='Max Price' />
     ),
     cell: ({ row }) => (
-      <div>${formatNumber(row.original.metadata.maxPrice)}</div>
+      <div>
+        {!row.original.alert
+          ? 'N/A'
+          : `$${formatMaxPrice(row.original.metadata.maxPrice)}`}
+      </div>
     ),
     enableSorting: true
   },
@@ -320,6 +394,10 @@ export const columns: ColumnDef<Token>[] = [
       <DataTableColumnHeader column={column} title='Dog' />
     ),
     cell: ({ row }) => {
+      if (!row.original.alert) {
+        return <div className='text-muted-foreground text-sm'>N/A</div>;
+      }
+
       const dogValue = row.original.metadata.dog;
 
       if (!dogValue) {
@@ -367,7 +445,18 @@ export const columns: ColumnDef<Token>[] = [
     header: ({ column }: { column: Column<Token, unknown> }) => (
       <DataTableColumnHeader column={column} title='Zero Time' />
     ),
-    cell: ({ row }) => <div>{row.original.metadata.zeroTimeSeconds}s</div>,
-    enableSorting: true
+    cell: ({ row }) => (
+      <div>
+        {!row.original.alert ? 'N/A' : row.original.metadata.zeroTimeSeconds}
+      </div>
+    ),
+    enableSorting: true,
+    enableColumnFilter: true,
+    filterFn: zeroTimeFilterFn,
+    meta: {
+      label: 'Zero Time',
+      variant: 'multiSelect',
+      options: ZERO_TIME_OPTIONS
+    }
   }
 ];

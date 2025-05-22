@@ -41,6 +41,12 @@ export const navItems: NavItem[] = [
         shortcut: ['s', 's']
       },
       {
+        title: '代币趋势',
+        url: '/dashboard/token-trends',
+        icon: 'arrowRight',
+        shortcut: ['t', 'r']
+      },
+      {
         title: 'KOL交易',
         url: '/dashboard/kol',
         icon: 'user',
