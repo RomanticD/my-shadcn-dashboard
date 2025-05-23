@@ -74,6 +74,10 @@ interface KolDetail {
   avatar: string;
   store_time: string;
   buy_counts: number;
+  sell_counts: number;
+  buy_volume: number;
+  sell_volume: number;
+  holding_time: number;
 }
 
 interface TokenData {
@@ -82,7 +86,10 @@ interface TokenData {
   symbol: string;
   chain: string;
   is_signaled: boolean;
-  buy_sum_counts: number;
+  avg_buy_count: number;
+  avg_sell_count: number;
+  avg_buy_volume: number;
+  avg_sell_volume: number;
   kols_details: KolDetail[];
 }
 
@@ -146,14 +153,47 @@ const KolDetailsTable = ({ kols }: { kols: KolDetail[] }) => {
       cell: ({ row }) => <div>{row.getValue('chain')}</div>
     },
     {
+      id: 'address',
+      header: 'Address',
+      cell: ({ row }) => {
+        const chain = row.original.chain;
+        const address = row.original.address;
+        return (
+          <a
+            href={`https://debot.ai/address/${chain}/${address}`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='hover:text-primary inline-flex items-center'
+          >
+            <ExternalLink className='h-4 w-4' />
+          </a>
+        );
+      }
+    },
+    {
       accessorKey: 'buy_counts',
       header: 'Buy Counts',
       cell: ({ row }) => <div>{row.getValue('buy_counts')}</div>
     },
     {
-      accessorKey: 'store_time',
-      header: 'Date',
-      cell: ({ row }) => <div>{row.getValue('store_time')}</div>
+      accessorKey: 'sell_counts',
+      header: 'Sell Counts',
+      cell: ({ row }) => <div>{row.getValue('sell_counts')}</div>
+    },
+    {
+      accessorKey: 'buy_volume',
+      header: 'Buy Volume',
+      cell: ({ row }) => <div>{row.getValue('buy_volume')}</div>
+    },
+    {
+      accessorKey: 'sell_volume',
+      header: 'Sell Volume',
+      cell: ({ row }) => <div>{row.getValue('sell_volume')}</div>
+    },
+    {
+      accessorKey: 'holding_time',
+      header: 'Holding Time',
+      cell: ({ row }) => <div>{row.getValue('holding_time')} s</div>
     }
   ];
 
@@ -526,18 +566,6 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
       )
     },
     {
-      accessorKey: 'symbol',
-      header: 'Symbol',
-      cell: ({ row }) => <SymbolCell symbol={row.getValue('symbol')} />
-    },
-    {
-      accessorKey: 'token_name',
-      header: 'Token Name',
-      cell: ({ row }) => (
-        <div className='font-medium'>{row.getValue('token_name')}</div>
-      )
-    },
-    {
       accessorKey: 'token_address',
       header: 'Token Address',
       cell: ({ row }) => (
@@ -572,18 +600,41 @@ export function KolTokenTable({ data }: KolTokenTableProps) {
       }
     },
     {
-      accessorKey: 'buy_sum_counts',
-      header: 'Total Buy Counts',
+      accessorKey: 'avg_buy_count',
+      header: 'Avg Buy Count',
       cell: ({ row }) => (
-        <div className='font-medium'>{row.getValue('buy_sum_counts')}</div>
+        <div className='font-medium'>{row.getValue('avg_buy_count')}</div>
       )
     },
     {
-      accessorKey: 'kols_count',
+      accessorKey: 'avg_sell_count',
+      header: 'Avg Sell Count',
+      cell: ({ row }) => (
+        <div className='font-medium'>{row.getValue('avg_sell_count')}</div>
+      )
+    },
+    {
+      accessorKey: 'avg_buy_volume',
+      header: 'Avg Buy Volume',
+      cell: ({ row }) => (
+        <div className='font-medium'>{row.getValue('avg_buy_volume')}</div>
+      )
+    },
+    {
+      accessorKey: 'avg_sell_volume',
+      header: 'Avg Sell Volume',
+      cell: ({ row }) => (
+        <div className='font-medium'>{row.getValue('avg_sell_volume')}</div>
+      )
+    },
+    {
+      id: 'kols_count',
+      accessorFn: (row) => row.kols_details.length,
       header: 'KOLs Count',
       cell: ({ row }) => (
         <div className='font-medium'>{row.original.kols_details.length}</div>
-      )
+      ),
+      sortingFn: 'basic'
     }
   ];
 
