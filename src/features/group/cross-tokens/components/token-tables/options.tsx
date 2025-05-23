@@ -32,7 +32,7 @@ function generateStoreTimeOptions() {
   const options = [];
   const today = new Date();
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 1; i < 4; i++) {
     const date = new Date();
     date.setDate(today.getDate() - i);
 

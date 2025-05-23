@@ -43,7 +43,7 @@ type TokenListingPageProps = {};
 export default async function TokenListingPage({}: TokenListingPageProps) {
   // Calculate timestamp for 1:00 AM of previous day
   const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setDate(yesterday.getDate() - 3);
   yesterday.setHours(1, 0, 0, 0);
   const startTimestamp = Math.floor(yesterday.getTime() / 1000);
 
