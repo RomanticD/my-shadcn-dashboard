@@ -28,7 +28,6 @@ import {
 } from 'recharts';
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 import { Icons } from '@/components/icons';
-import { tokenTrendsData } from '@/constants/tokenTrendsData';
 import { TokenTrendsLineChartSkeleton } from './components/token-trends-line-chart-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -187,58 +186,100 @@ export default function TokenTrendsPage() {
   >([]);
   const [selectedToken, setSelectedToken] = useState<any>(null);
   const [chartData, setChartData] = useState<any[]>([]);
+  const [apiData, setApiData] = useState<any>(null);
 
-  useEffect(() => {
-    // Set loading to true initially
-    setIsLoading(true);
+  // Function to get UTC date 3 days ago at 1:00 AM
+  const getBaseTimeThreeDaysAgo = (): number => {
+    const now = new Date();
+    now.setUTCDate(now.getUTCDate() - 4);
+    now.setUTCHours(1, 0, 0, 0);
+    return Math.floor(now.getTime() / 1000); // Unix timestamp in seconds
+  };
 
-    // Add artificial delay to simulate network request
-    setTimeout(() => {
-      const items = tokenTrendsData.data.items.map((item) => ({
-        value: item.date.toString(),
-        label: formatDate(item.date)
-      }));
-
-      setDateItems(items);
-      setSelectedDateId(items[0].value);
-
-      const dateData = tokenTrendsData.data.items.find(
-        (item) => item.date.toString() === items[0].value
+  // Fetch data from API
+  const fetchTokenTrendsData = async () => {
+    try {
+      setIsLoading(true);
+      const baseTime = getBaseTimeThreeDaysAgo();
+      const response = await fetch(
+        `http://localhost:3001/api/graph/gmgn_debot?base_time=${baseTime}`
       );
 
-      setSelectedDateData(dateData);
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
 
-      const options =
-        dateData?.tokens.map((token: any, index: number) => ({
-          value: index.toString(),
-          label: token.token_name
-        })) || [];
+      const data = await response.json();
+      setApiData(data);
 
-      setTokenOptions(options);
+      if (data.data?.items?.length) {
+        const items = data.data.items.map((item: any) => ({
+          value: item.store_time || item.query_id.toString(),
+          label: item.store_time || formatDate(data.data.date)
+        }));
 
-      const token = dateData?.tokens[0];
-      setSelectedToken(token);
+        // Sort items with most recent dates at the top
+        items.sort(
+          (
+            a: { value: string; label: string },
+            b: { value: string; label: string }
+          ) => b.value.localeCompare(a.value)
+        );
 
-      const data = token?.time_range || [];
-      setChartData(data);
+        setDateItems(items);
 
-      // Set loading to false after data is processed
+        if (items.length > 0) {
+          setSelectedDateId(items[0].value);
+          const dateData = data.data.items[0];
+          setSelectedDateData(dateData);
+
+          if (dateData?.tokens?.length) {
+            const options = dateData.tokens.map(
+              (token: any, index: number) => ({
+                value: index.toString(),
+                label: token.token_name
+              })
+            );
+
+            setTokenOptions(options);
+            setSelectedTokenIndex(0);
+
+            const token = dateData.tokens[0];
+            setSelectedToken(token);
+
+            const chartData = token?.time_range || [];
+            setChartData(chartData);
+          }
+        }
+      }
+
       setIsLoading(false);
-    }, 2000); // 2 second delay
+    } catch (error) {
+      console.error('Error fetching token trends data:', error);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTokenTrendsData();
   }, []);
 
   // Handle date change
   const handleDateChange = (value: string) => {
     setSelectedDateId(value);
 
-    const dateData = tokenTrendsData.data.items.find(
-      (item) => item.date.toString() === value
+    if (!apiData?.data?.items) return;
+
+    const dateData = apiData.data.items.find(
+      (item: any) => (item.store_time || item.query_id.toString()) === value
     );
+
+    if (!dateData) return;
 
     setSelectedDateData(dateData);
 
     const options =
-      dateData?.tokens.map((token: any, index: number) => ({
+      dateData?.tokens?.map((token: any, index: number) => ({
         value: index.toString(),
         label: token.token_name
       })) || [];
@@ -246,11 +287,13 @@ export default function TokenTrendsPage() {
     setTokenOptions(options);
     setSelectedTokenIndex(0);
 
-    const token = dateData?.tokens[0];
-    setSelectedToken(token);
+    if (dateData.tokens?.length) {
+      const token = dateData.tokens[0];
+      setSelectedToken(token);
 
-    const data = token?.time_range || [];
-    setChartData(data);
+      const data = token?.time_range || [];
+      setChartData(data);
+    }
   };
 
   // Handle token change
@@ -258,11 +301,14 @@ export default function TokenTrendsPage() {
     const index = parseInt(value);
     setSelectedTokenIndex(index);
 
-    const token = selectedDateData?.tokens[index];
-    setSelectedToken(token);
+    if (!selectedDateData?.tokens) return;
 
-    const data = token?.time_range || [];
-    setChartData(data);
+    const token = selectedDateData.tokens[index];
+    if (token) {
+      setSelectedToken(token);
+      const data = token?.time_range || [];
+      setChartData(data);
+    }
   };
 
   return (
