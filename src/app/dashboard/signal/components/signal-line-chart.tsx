@@ -92,12 +92,12 @@ export function SignalLineChart({
 }: SignalLineChartProps) {
   const chartConfig: ChartConfig = {
     count: {
-      label: 'Count',
-      color: '#2563eb'
+      label: '代币数',
+      color: '#f59e0b'
     },
     signal_count: {
-      label: 'Signal Count',
-      color: '#f59e0b'
+      label: '信号数',
+      color: '#2563eb'
     }
   };
 
@@ -135,7 +135,7 @@ export function SignalLineChart({
               <Line
                 type='monotone'
                 dataKey='count'
-                name='Count'
+                name='代币数'
                 stroke={chartConfig.count.color}
                 strokeWidth={2}
                 dot={false}
@@ -147,7 +147,7 @@ export function SignalLineChart({
               <Line
                 type='monotone'
                 dataKey='signal_count'
-                name='Signal Count'
+                name='信号数'
                 stroke={chartConfig.signal_count.color}
                 strokeWidth={2}
                 dot={false}

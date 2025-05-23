@@ -42,11 +42,17 @@ interface TimeRangeData {
 interface ChainData {
   chain_name: string;
   total_signals: TimeRangeData[];
+  total_transaction_amount?: number;
+  total_transaction_count?: number;
+  avg_transaction_volume?: number;
 }
 
 interface SignalData {
   store_time: string;
   data_by_chain: ChainData[];
+  total_transaction_amount?: number;
+  total_transaction_count?: number;
+  avg_transaction_volume?: number;
 }
 
 interface DayData {
@@ -64,6 +70,9 @@ interface ChartData {
   time_range: string;
   count: number;
   signal_count: number;
+  total_transaction_amount?: number;
+  total_transaction_count?: number;
+  avg_transaction_volume?: number;
 }
 
 interface DailyChartData {
@@ -102,146 +111,6 @@ const createTokenInfo = (
   max_price: maxPrice,
   to_zero_seconds: toZeroSeconds
 });
-
-// Generate mock data that covers all 24 hours
-const generateMockData = (): ApiResponse => {
-  const dates = ['2025-05-18', '2025-05-19', '2025-05-20'];
-  const baseTimestamp = 1747440000; // Base timestamp for May 18, 2025
-  const dayInSeconds = 86400;
-
-  // Dog types
-  const dogTypes = ['金狗', '银狗', '铜狗', null];
-
-  // Chain names
-  const chains = ['solana', 'bsc'];
-
-  // Generate data for each day
-  return {
-    code: 200,
-    description: 'Successfully fetched daily signal data.',
-    data: dates.map((date, dateIndex) => {
-      const dayTimestamp = baseTimestamp + dateIndex * dayInSeconds;
-
-      return {
-        date: dayTimestamp,
-        signals: {
-          store_time: date,
-          data_by_chain: chains.map((chain) => {
-            // Create time ranges data for each hour of the day
-            const timeRanges = Array.from({ length: 24 }, (_, i) => {
-              const startHour = i;
-              const endHour = (i + 1) % 24;
-              const timeRange = `${startHour}:00-${endHour}:00`;
-
-              // Generate random count based on time of day
-              // Make some hours busier than others
-              let count = 0;
-              let signalCount = 0;
-
-              // More activity during market hours (9am-5pm)
-              if (startHour >= 9 && startHour < 17) {
-                count = Math.floor(Math.random() * 15) + 5; // 5-20
-              } else if (startHour >= 20 || startHour < 4) {
-                // Less activity during night
-                count = Math.floor(Math.random() * 5) + 1; // 1-5
-              } else {
-                // Moderate activity during other hours
-                count = Math.floor(Math.random() * 8) + 2; // 2-10
-              }
-
-              // Sometimes signal count is same as count, sometimes less
-              signalCount = Math.floor(Math.random() * (count + 1));
-
-              // If count is zero, make sure signal count is also zero
-              if (count === 0) signalCount = 0;
-
-              // Generate tokens for this time range
-              const tokensInfo: TokenInfo[] = Array.from(
-                { length: signalCount },
-                (_, tokenIndex) => {
-                  const tokenTimestamp =
-                    dayTimestamp +
-                    startHour * 3600 +
-                    Math.floor(Math.random() * 3600);
-                  const randomDog =
-                    dogTypes[Math.floor(Math.random() * dogTypes.length)];
-
-                  // Generate token name based on chain
-                  let tokenName = '';
-                  if (chain === 'solana') {
-                    tokenName = `${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`;
-                  } else {
-                    tokenName = `0x${Math.random().toString(16).substring(2, 42)}`;
-                  }
-
-                  // Generate symbol
-                  const symbol = `${chain.toUpperCase().substring(0, 3)}${Math.floor(Math.random() * 1000)}`;
-
-                  // Generate transaction amount and count
-                  const txAmount = Math.random() * 10000 + 100;
-                  const txCount = Math.floor(Math.random() * 100) + 5;
-
-                  // Generate max increase and price
-                  const maxIncrease = Math.random() * 10;
-                  const maxPrice = Math.random() * 0.001;
-
-                  // Generate to_zero_seconds (50% chance to be zeroed)
-                  const toZeroSeconds =
-                    Math.random() > 0.5
-                      ? Math.floor(Math.random() * 100000)
-                      : 0;
-
-                  return createTokenInfo(
-                    tokenName,
-                    chain,
-                    symbol,
-                    tokenTimestamp,
-                    randomDog,
-                    txAmount,
-                    txCount,
-                    maxIncrease,
-                    maxPrice,
-                    toZeroSeconds
-                  );
-                }
-              );
-
-              // Calculate total transaction statistics
-              const totalTxAmount = tokensInfo.reduce(
-                (sum, token) => sum + token.transaction_amount,
-                0
-              );
-              const totalTxCount = tokensInfo.reduce(
-                (sum, token) => sum + token.transaction_count,
-                0
-              );
-              const avgTxVolume =
-                totalTxCount > 0 ? totalTxAmount / totalTxCount : 0;
-
-              return {
-                time_range: timeRange,
-                count: count,
-                signal_count: signalCount,
-                tokens_info: tokensInfo,
-                total_transaction_amount: totalTxAmount,
-                total_transaction_count: totalTxCount,
-                avg_transaction_volume: avgTxVolume
-              };
-            });
-
-            return {
-              chain_name: chain,
-              total_signals: timeRanges
-            };
-          })
-        }
-      };
-    })
-  };
-};
-
-// Generate mock data
-const mockData = generateMockData();
 
 // Create a full dataset with all time ranges for each day and chain
 const generateCompleteChartData = (data: DayData[]): DailyChartData => {
@@ -321,6 +190,41 @@ const extractAllTokens = (data: DayData[]): TokenTableData[] => {
   return tokens;
 };
 
+// Function to fetch real data from API
+const fetchSignalData = async (): Promise<ApiResponse | null> => {
+  try {
+    // Calculate timestamp for 3 days ago at 1:00 AM
+    const three_days_ago = new Date();
+    three_days_ago.setDate(three_days_ago.getDate() - 3);
+    three_days_ago.setHours(1, 0, 0, 0);
+    const startTimestamp = Math.floor(three_days_ago.getTime() / 1000);
+
+    const response = await fetch(
+      `http://localhost:3001/api/graph/daily-signals?base_time=${startTimestamp}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching signal data:', error);
+    return null;
+  }
+};
+
+// Format timestamp to show only time (hours:minutes:seconds)
+const formatTimeOnly = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000);
+  return date.toTimeString().split(' ')[0];
+};
+
+// Format max increase as percentage
+const formatAsPercentage = (value: number): string => {
+  return `${(value * 100).toFixed(2)}%`;
+};
+
 export default function SignalPage() {
   const [chartData, setChartData] = useState<DailyChartData>({});
   const [allTokens, setAllTokens] = useState<TokenTableData[]>([]);
@@ -329,24 +233,42 @@ export default function SignalPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set loading to true initially
-    setIsLoading(true);
+    const loadData = async () => {
+      setIsLoading(true);
 
-    // Add artificial delay to simulate network request
-    setTimeout(() => {
-      const processedChartData = generateCompleteChartData(mockData.data);
-      const processedTokens = extractAllTokens(mockData.data);
-      const initialDate = mockData.data[0].signals.store_time;
-      const datesList = mockData.data.map((item) => item.signals.store_time);
+      try {
+        const apiData = await fetchSignalData();
 
-      setChartData(processedChartData);
-      setAllTokens(processedTokens);
-      setSelectedDate(initialDate);
-      setDates(datesList);
+        if (apiData && apiData.data && apiData.data.length > 0) {
+          const processedChartData = generateCompleteChartData(apiData.data);
+          const processedTokens = extractAllTokens(apiData.data);
 
-      // Set loading to false after data is processed
-      setIsLoading(false);
-    }, 2000); // 2 second delay
+          // Sort dates from newest to oldest
+          const datesList = apiData.data
+            .map((item) => item.signals.store_time)
+            .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+          setChartData(processedChartData);
+          setAllTokens(processedTokens);
+          setDates(datesList);
+
+          // Set the most recent date as the selected date
+          if (datesList.length > 0) {
+            setSelectedDate(datesList[0]);
+          }
+        } else {
+          console.error(
+            'No data received from API or data format is incorrect'
+          );
+        }
+      } catch (error) {
+        console.error('Error processing signal data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (
@@ -397,7 +319,12 @@ export default function SignalPage() {
         {isLoading ? (
           <SimpleTableSkeleton columnCount={8} rowCount={10} />
         ) : (
-          <SignalTable data={allTokens} selectedDate={selectedDate} />
+          <SignalTable
+            data={allTokens}
+            selectedDate={selectedDate}
+            formatTimeOnly={formatTimeOnly}
+            formatAsPercentage={formatAsPercentage}
+          />
         )}
       </div>
     </div>

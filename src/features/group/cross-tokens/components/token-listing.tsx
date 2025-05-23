@@ -42,10 +42,10 @@ type TokenListingPageProps = {};
 
 export default async function TokenListingPage({}: TokenListingPageProps) {
   // Calculate timestamp for 1:00 AM of previous day
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 3);
-  yesterday.setHours(1, 0, 0, 0);
-  const startTimestamp = Math.floor(yesterday.getTime() / 1000);
+  const three_days_age = new Date();
+  three_days_age.setDate(three_days_age.getDate() - 3);
+  three_days_age.setHours(1, 0, 0, 0);
+  const startTimestamp = Math.floor(three_days_age.getTime() / 1000);
 
   // Fetch data from API
   const response = await fetch(

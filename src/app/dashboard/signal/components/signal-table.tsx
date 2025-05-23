@@ -70,9 +70,16 @@ interface TokenData {
 interface SignalTableProps {
   data: TokenData[];
   selectedDate: string;
+  formatTimeOnly?: (timestamp: number) => string;
+  formatAsPercentage?: (value: number) => string;
 }
 
-export function SignalTable({ data, selectedDate }: SignalTableProps) {
+export function SignalTable({
+  data,
+  selectedDate,
+  formatTimeOnly,
+  formatAsPercentage
+}: SignalTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -177,8 +184,13 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
       ),
       cell: ({ row }) => {
         const timestamp = row.getValue('first_signal_time') as number;
-        const date = new Date(timestamp * 1000);
-        return <div>{date.toLocaleString()}</div>;
+        return (
+          <div>
+            {formatTimeOnly
+              ? formatTimeOnly(timestamp)
+              : new Date(timestamp * 1000).toLocaleString()}
+          </div>
+        );
       },
       sortingFn: 'datetime'
     },
@@ -303,11 +315,13 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
       ),
       cell: ({ row }) => {
         const value = parseFloat(row.getValue('max_increase'));
-        const formatted = new Intl.NumberFormat('en-US', {
-          style: 'percent',
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }).format(value);
+        const formatted = formatAsPercentage
+          ? formatAsPercentage(value)
+          : new Intl.NumberFormat('en-US', {
+              style: 'percent',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }).format(value);
         return <div className='text-right font-medium'>{formatted}</div>;
       },
       sortingFn: 'basic'
@@ -336,7 +350,7 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
         const amount = parseFloat(row.getValue('max_price'));
         const formatted = new Intl.NumberFormat('en-US', {
           minimumFractionDigits: 6,
-          maximumFractionDigits: 10
+          maximumFractionDigits: 20
         }).format(amount);
         return <div className='text-right font-medium'>{formatted}</div>;
       },
@@ -448,19 +462,19 @@ export function SignalTable({ data, selectedDate }: SignalTableProps) {
             multiple
           />
         )}
+        {table.getColumn('dog') && (
+          <DataTableFacetedFilter
+            column={table.getColumn('dog')}
+            title='筛选狗'
+            options={uniqueDogs}
+            multiple
+          />
+        )}
         {table.getColumn('time_range') && (
           <DataTableFacetedFilter
             column={table.getColumn('time_range')}
             title='筛选时间段'
             options={uniqueTimeRanges}
-            multiple
-          />
-        )}
-        {table.getColumn('dog') && (
-          <DataTableFacetedFilter
-            column={table.getColumn('dog')}
-            title='筛选狗种类'
-            options={uniqueDogs}
             multiple
           />
         )}
