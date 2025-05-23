@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { Token } from '@/models/token';
-import { Column, ColumnDef, FilterFn } from '@tanstack/react-table';
+import { Column, ColumnDef, FilterFn, SortingFn } from '@tanstack/react-table';
 import {
   CheckCircle2,
   ExternalLink,
@@ -164,6 +164,13 @@ const formatMaxPrice = (value: number) => {
   return stringValue;
 };
 
+// Custom sorting function for storeTime
+const storeTimeSortingFn: SortingFn<Token> = (rowA, rowB) => {
+  const dateA = new Date(rowA.getValue('storeTime')).getTime();
+  const dateB = new Date(rowB.getValue('storeTime')).getTime();
+  return dateA - dateB; // Ascending order by default
+};
+
 export const columns: ColumnDef<Token>[] = [
   {
     id: 'storeTime',
@@ -175,6 +182,7 @@ export const columns: ColumnDef<Token>[] = [
     enableColumnFilter: true,
     filterFn: multiSelectFilterFn,
     enableSorting: true,
+    sortingFn: storeTimeSortingFn,
     meta: {
       label: 'Store Time',
       variant: 'multiSelect',

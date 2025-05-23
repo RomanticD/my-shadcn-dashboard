@@ -32,6 +32,7 @@ export function TokenTableToolbar<TData>({
   const chainColumn = table.getColumn('chain');
   const storeTimeColumn = table.getColumn('storeTime');
   const zeroTimeColumn = table.getColumn('zeroTimeSeconds');
+  const dogColumn = table.getColumn('dog');
 
   return (
     <div
@@ -94,12 +95,26 @@ export function TokenTableToolbar<TData>({
           />
         )}
 
-        {/* Zero Time filter - displayed fifth, after Chain filter */}
+        {/* Zero Time filter - displayed fifth */}
         {zeroTimeColumn && (
           <DataTableFacetedFilter
             column={zeroTimeColumn}
             title='筛选归零'
             options={ZERO_TIME_OPTIONS}
+            multiple={true}
+          />
+        )}
+
+        {/* Dog filter - displayed sixth, after Zero Time filter */}
+        {dogColumn && (
+          <DataTableFacetedFilter
+            column={dogColumn}
+            title='筛选狗子'
+            options={[
+              { label: '金狗', value: '金狗' },
+              { label: '银狗', value: '银狗' },
+              { label: '铜狗', value: '铜狗' }
+            ]}
             multiple={true}
           />
         )}
