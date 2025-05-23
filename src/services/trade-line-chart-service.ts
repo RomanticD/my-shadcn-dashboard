@@ -8,7 +8,7 @@ import {
 
 // Service class for trade line chart data
 export class TradeLineChartService {
-  private static API_URL = 'http://localhost:3001/api/graph/trade-line';
+  private static API_URL = 'http://localhost:3222/api/graph/trade-line';
 
   // Get trade line chart data
   static async getTradeLineChartData(): Promise<TradeChartData> {

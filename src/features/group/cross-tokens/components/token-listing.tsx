@@ -49,7 +49,7 @@ export default async function TokenListingPage({}: TokenListingPageProps) {
 
   // Fetch data from API
   const response = await fetch(
-    `http://localhost:3001/api/graph/token-summary?start_time=${startTimestamp}`,
+    `http://localhost:3222/api/graph/token-summary?start_time=${startTimestamp}`,
     {
       cache: 'no-store'
     }

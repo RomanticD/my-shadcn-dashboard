@@ -225,7 +225,7 @@ export default function KolPage() {
         const startTimestamp = Math.floor(three_days_ago.getTime() / 1000);
 
         const response = await fetch(
-          `http://localhost:3001/api/graph/kol_daily?base_ts=${startTimestamp}`
+          `http://localhost:3222/api/graph/kol_daily?base_ts=${startTimestamp}`
         );
         const apiData: ApiResponse = await response.json();
 
