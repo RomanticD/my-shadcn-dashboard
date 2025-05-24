@@ -282,11 +282,20 @@ export default function SignalPage() {
                 <SelectValue placeholder='Select date' />
               </SelectTrigger>
               <SelectContent>
-                {dates.map((date) => (
-                  <SelectItem key={date} value={date}>
-                    {date}
-                  </SelectItem>
-                ))}
+                {dates.map((date, index) => {
+                  const currentDate = new Date(date);
+                  const previousDate = new Date(currentDate);
+                  previousDate.setDate(previousDate.getDate() - 1);
+                  const previousDateStr = previousDate
+                    .toISOString()
+                    .split('T')[0];
+
+                  return (
+                    <SelectItem key={date} value={date}>
+                      {previousDateStr}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           )}

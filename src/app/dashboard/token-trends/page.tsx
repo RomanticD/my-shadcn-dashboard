@@ -213,24 +213,24 @@ export default function TokenTrendsPage() {
       setApiData(data);
 
       if (data.data?.items?.length) {
-        const items = data.data.items.map((item: any) => ({
+        // Sort items with most recent dates at the top
+        const sortedItems = [...data.data.items].sort((a, b) => {
+          const timeA = a.store_time || a.query_id.toString();
+          const timeB = b.store_time || b.query_id.toString();
+          return timeB.localeCompare(timeA);
+        });
+
+        const items = sortedItems.map((item: any) => ({
           value: item.store_time || item.query_id.toString(),
           label: item.store_time || formatDate(data.data.date)
         }));
 
-        // Sort items with most recent dates at the top
-        items.sort(
-          (
-            a: { value: string; label: string },
-            b: { value: string; label: string }
-          ) => b.value.localeCompare(a.value)
-        );
-
         setDateItems(items);
 
         if (items.length > 0) {
-          setSelectedDateId(items[0].value);
-          const dateData = data.data.items[0];
+          const mostRecentDate = items[0].value;
+          setSelectedDateId(mostRecentDate);
+          const dateData = sortedItems[0]; // Use sortedItems instead of data.data.items[0]
           setSelectedDateData(dateData);
 
           if (dateData?.tokens?.length) {
@@ -322,11 +322,20 @@ export default function TokenTrendsPage() {
                 <SelectValue placeholder='选择日期' />
               </SelectTrigger>
               <SelectContent>
-                {dateItems.map((date) => (
-                  <SelectItem key={date.value} value={date.value}>
-                    {date.label}
-                  </SelectItem>
-                ))}
+                {dateItems.map((date) => {
+                  const currentDate = new Date(date.value);
+                  const previousDate = new Date(currentDate);
+                  previousDate.setDate(previousDate.getDate() - 1);
+                  const previousDateStr = previousDate
+                    .toISOString()
+                    .split('T')[0];
+
+                  return (
+                    <SelectItem key={date.value} value={date.value}>
+                      {previousDateStr}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           ) : (
