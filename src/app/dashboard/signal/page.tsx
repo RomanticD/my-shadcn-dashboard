@@ -312,12 +312,12 @@ export default function SignalPage() {
           <>
             <SignalLineChart
               data={chartData[selectedDate]?.solana || []}
-              title={`Solana Signals (${selectedDate})`}
+              title={`Solana Signals (${new Date(new Date(selectedDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]})`}
               subtext='Count and signal count by time range'
             />
             <SignalLineChart
               data={chartData[selectedDate]?.bsc || []}
-              title={`BSC Signals (${selectedDate})`}
+              title={`BSC Signals (${new Date(new Date(selectedDate).getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]})`}
               subtext='Count and signal count by time range'
             />
           </>

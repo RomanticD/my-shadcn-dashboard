@@ -47,7 +47,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         {payload.map((entry: any, index: number) => (
           <div key={`item-${index}`} className='text-sm'>
             <span style={{ color: entry.color }}>●</span>{' '}
-            {entry.name === 'count' ? '统计数量: ' : '信号数量: '}
+            {entry.dataKey === 'count' ? '代币数: ' : '信号数: '}
             {entry.value}
           </div>
         ))}
