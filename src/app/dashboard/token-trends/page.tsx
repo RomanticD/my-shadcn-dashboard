@@ -202,7 +202,7 @@ export default function TokenTrendsPage() {
       setIsLoading(true);
       const baseTime = getBaseTimeThreeDaysAgo();
       const response = await fetch(
-        `/api/graph/gmgn_debot?base_time=${baseTime}`
+        `http://172.245.211.10:3222/api/graph/gmgn_debot?base_time=${baseTime}`
       );
 
       if (!response.ok) {

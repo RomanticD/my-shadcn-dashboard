@@ -200,7 +200,7 @@ const fetchSignalData = async (): Promise<ApiResponse | null> => {
     const startTimestamp = Math.floor(three_days_ago.getTime() / 1000);
 
     const response = await fetch(
-      `/api/graph/daily-signals?base_time=${startTimestamp}`
+      `http://172.245.211.10:3222/api/graph/daily-signals?base_time=${startTimestamp}`
     );
 
     if (!response.ok) {
